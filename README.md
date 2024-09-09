@@ -6,38 +6,52 @@ I’m a Data Scientist with a passion for solving real-world problems using Pyth
 - 🔭 I’m currently working on AI, ML, and Data Science projects.
 - 🌱 I’m always learning new things, currently focusing on deep learning and cloud services.
 - 👯 I’m looking to collaborate on exciting data science and AI projects.
-- 🤔 I’m looking for help with expanding my knowledge in cloud-based AI services.
 - 💬 Ask me about Python, Data Science, Machine Learning, or any project in AI/ML.
-- 📫 How to reach me: [Email](mailto:B.LourdhuRaju1234@gmail.com) | 
-- 😄 Pronouns: He/Him
+- 📫 How to reach me: [Email](mailto:B.LourdhuRaju1234@gmail.com)
 - ⚡ Fun fact: I enjoy chess and exploring cutting-edge tech in my free time!
 
-## 🛠️ Skills & Abilities
-- **Programming Languages**: Python, SQL
-- **Data Manipulation**: Pandas, NumPy
-- **Machine Learning**: Scikit-Learn, TensorFlow, Keras
-- **Deep Learning**: Keras, TensorFlow, YOLO, Pytorch, OpenCV2
-- **Data Visualization**: Seaborn, Matplotlib, Pyplot
-- **Big Data Technologies**: PySpark, Linux, Microsoft Excel
-- **Tools**: Jupyter Notebook, Git, VS Code
-- **Cloud Services**: AWS
-- **Languages**: Telugu, Hindi, English
+---
 
-## 🎓 Education
-**B.Tech in Computer Science and Engineering**  
-Andhra Loyola Institute of Engineering and Technology (May 2024)  
-Vijayawada, Andhra Pradesh  
+## 🛠️ Skills & Technologies
+<p align="left">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/SQL-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="SQL">
+  <img src="https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white" alt="TensorFlow">
+  <img src="https://img.shields.io/badge/Keras-D00000?style=for-the-badge&logo=keras&logoColor=white" alt="Keras">
+  <img src="https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white" alt="Pandas">
+  <img src="https://img.shields.io/badge/Numpy-013243?style=for-the-badge&logo=numpy&logoColor=white" alt="Numpy">
+  <img src="https://img.shields.io/badge/Scikit_Learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white" alt="Scikit-learn">
+  <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch">
+  <img src="https://img.shields.io/badge/Seaborn-6AB9E4?style=for-the-badge&logo=seaborn&logoColor=white" alt="Seaborn">
+  <img src="https://img.shields.io/badge/Matplotlib-006400?style=for-the-badge&logo=matplotlib&logoColor=white" alt="Matplotlib">
+  <img src="https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white" alt="OpenCV">
+  <img src="https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="AWS">
+</p>
 
+---
+
+## 💼 Projects
+- **Sales Forecasting Model**: Built a regression-based model to predict sales using Python, Pandas, and Scikit-Learn.
+- **Sentiment Analysis of Twitter Data**: Developed NLP models for sentiment classification using NLTK, Python, and Scikit-Learn.
+- **AI-Based Exam Surveillance System**: Built a YOLO-based real-time detection system for exam integrity monitoring using TensorFlow and OpenCV.
+
+---
 
 ## 🏅 Certifications
-- Data Science Intern, BrainOvision Solutions Pvt. Ltd. (Feb 2024 - Apr 2024)
-- Machine Learning Intern, Indian Servers (July 2023 - Sept 2023)
+- **Data Science Intern**, BrainOvision Solutions Pvt. Ltd. (Feb 2024 - Apr 2024)
+- **Machine Learning Intern**, Indian Servers (July 2023 - Sept 2023)
 
-## 📰 Publications
-- *Advancing Academic Integrity: The Role of AI in Exam Surveillance*, Industrial Engineering Journal, Vol. 53, No. 4, May 2024, ISSN 0970-2555, IF=6.82
-
+---
 
 ## 📱 Connect with me:
-- **Instagram**: [iam_beowulf_](https://www.instagram.com/iam_beowulf_)
-- **YouTube**: [Mr_Lr02](https://www.youtube.com/@Mr_Lr02)
-
+<p align="left">
+  <a href="https://www.instagram.com/iam_beowulf_" target="blank">
+    <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram">
+  </a>
+  <a href="https://www.youtube.com/@Mr_Lr02" target="blank">
+    <img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube">
+  </a>
+  <a href="mailto:B.LourdhuRaju1234@gmail.com" target="blank">
+    <img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
+  </a>
+</p>
