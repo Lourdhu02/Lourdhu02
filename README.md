@@ -26,14 +26,12 @@ I’m a Data Scientist with a passion for solving real-world problems using Pyth
   <img src="https://img.shields.io/badge/Matplotlib-006400?style=for-the-badge&logo=matplotlib&logoColor=white" alt="Matplotlib">
   <img src="https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white" alt="OpenCV">
   <img src="https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="AWS">
+  <img src="https://img.shields.io/badge/NLP-000080?style=for-the-badge&logo=nlp&logoColor=white" alt="NLP">
+  <img src="https://img.shields.io/badge/YOLO-1E90FF?style=for-the-badge&logo=yolo&logoColor=white" alt="YOLO">
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/Google%20Colab-F9AB00?style=for-the-badge&logo=google-colab&logoColor=white" alt="Google Colab">
+  <img src="https://img.shields.io/badge/MLFlow-1C3D76?style=for-the-badge&logo=mlflow&logoColor=white" alt="MLFlow">
 </p>
-
----
-
-## 💼 Projects
-- **Sales Forecasting Model**: Built a regression-based model to predict sales using Python, Pandas, and Scikit-Learn.
-- **Sentiment Analysis of Twitter Data**: Developed NLP models for sentiment classification using NLTK, Python, and Scikit-Learn.
-- **AI-Based Exam Surveillance System**: Built a YOLO-based real-time detection system for exam integrity monitoring using TensorFlow and OpenCV.
 
 ---
 
@@ -43,15 +41,12 @@ I’m a Data Scientist with a passion for solving real-world problems using Pyth
 
 ---
 
-## 📱 Connect with me:
+## 📱 Follow Me:
 <p align="left">
   <a href="https://www.instagram.com/iam_beowulf_" target="blank">
     <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram">
   </a>
   <a href="https://www.youtube.com/@Mr_Lr02" target="blank">
     <img src="https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube">
-  </a>
-  <a href="mailto:B.LourdhuRaju1234@gmail.com" target="blank">
-    <img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
   </a>
 </p>
