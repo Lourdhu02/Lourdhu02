@@ -1,7 +1,7 @@
 
 # **Hi there 👋 I'm Lourdhu Raju!**  
 
-## **🚀 About Me**  
+## **About Me**  
 I am a passionate **Data Scientist** and **Machine Learning Engineer** dedicated to solving real-world problems through data-driven insights and cutting-edge AI technologies. From data manipulation and predictive analytics to deep learning and LLMs, I thrive on turning complex challenges into impactful solutions.  
 
 - Currently working on **AI, Machine Learning, and Data Science** projects.  
@@ -12,7 +12,7 @@ I am a passionate **Data Scientist** and **Machine Learning Engineer** dedicated
 
 ---
 
-## **🛠️ Skills & Technologies**  
+## **Skills & Technologies**  
 
 <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">  
   <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">  
@@ -36,7 +36,7 @@ I am a passionate **Data Scientist** and **Machine Learning Engineer** dedicated
 
 ---
 
-## **🏅 Certifications**  
+## **Certifications**  
 - **Microsoft Power BI Data Analyst Professional Certificate**, Microsoft (2024)  
 - **Databases and SQL for Data Science with Python**, IBM (2024)  
 - **Machine Learning Specialization**, Deeplearning.ai, Stanford (2024)  
