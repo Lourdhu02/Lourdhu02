@@ -1,44 +1,66 @@
+# 👋 Hi there, I'm **Lourdhu Raju**  
 
-# **Hi there 👋 I'm Lourdhu Raju!**  
+## About Me  
+I’m a passionate **Frontend Developer** specializing in **React.js** and **Next.js**, with expertise in building **high-performance, scalable, and user-centric web applications**.  
+I enjoy crafting clean, modern UIs, integrating animations, and delivering seamless user experiences.  
 
-## **About Me**  
-I am a passionate **Data Scientist** and **Machine Learning Engineer** dedicated to solving real-world problems through data-driven insights and cutting-edge AI technologies. From data manipulation and predictive analytics to deep learning and LLMs, I thrive on turning complex challenges into impactful solutions.  
-
-- Currently working on **AI, Machine Learning, and Data Science** projects.  
-- Continuously learning, with a focus on **deep learning**, **neural networks**, and **cloud computing**.  
-- Ask me about **Python**, **Machine Learning**, or any projects related to **AI and Data Science**.  
-- Reach me at: [Email](mailto:b.lourdhuraju1234@gmail.com)  
-- Fun fact: I enjoy **chess** and exploring **emerging technologies** in my free time.  
+-  Currently working on **React.js, Next.js, and UI/UX-focused projects**  
+-  Strong focus on **performance optimization, responsive design, and accessibility**  
+-  Open to collaborations on **Frontend Development, UI/UX Engineering, and Web Animations**  
+-  Reach me at: [Email](mailto:b.lourdhuraju1234@gmail.com)  
+-  Fun fact: I enjoy designing **interactive UIs** and experimenting with **3D web visualizations**  
 
 ---
 
-## **Skills & Technologies**  
+## Skills & Technologies  
 
 <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">  
-  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">  
-  <img src="https://img.shields.io/badge/SQL-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="SQL">  
-  <img src="https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white" alt="TensorFlow">  
-  <img src="https://img.shields.io/badge/Keras-D00000?style=for-the-badge&logo=keras&logoColor=white" alt="Keras">  
-  <img src="https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white" alt="Pandas">  
-  <img src="https://img.shields.io/badge/Numpy-013243?style=for-the-badge&logo=numpy&logoColor=white" alt="Numpy">  
-  <img src="https://img.shields.io/badge/Scikit_Learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white" alt="Scikit-learn">  
-  <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch">  
-  <img src="https://img.shields.io/badge/Seaborn-6AB9E4?style=for-the-badge&logo=seaborn&logoColor=white" alt="Seaborn">  
-  <img src="https://img.shields.io/badge/Matplotlib-006400?style=for-the-badge&logo=matplotlib&logoColor=white" alt="Matplotlib">  
-  <img src="https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white" alt="OpenCV">  
-  <img src="https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white" alt="AWS">  
-  <img src="https://img.shields.io/badge/NLP-000080?style=for-the-badge&logo=nlp&logoColor=white" alt="NLP">  
-  <img src="https://img.shields.io/badge/YOLO-1E90FF?style=for-the-badge&logo=yolo&logoColor=white" alt="YOLO">  
-  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">  
-  <img src="https://img.shields.io/badge/Google%20Colab-F9AB00?style=for-the-badge&logo=google-colab&logoColor=white" alt="Google Colab">  
-  <img src="https://img.shields.io/badge/MLFlow-1C3D76?style=for-the-badge&logo=mlflow&logoColor=white" alt="MLFlow">  
+  <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React">  
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js">  
+  <img src="https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">  
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">  
+  <img src="https://img.shields.io/badge/TailwindCSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">  
+  <img src="https://img.shields.io/badge/MaterialUI-007FFF?style=for-the-badge&logo=mui&logoColor=white" alt="Material UI">  
+  <img src="https://img.shields.io/badge/FramerMotion-0055FF?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion">  
+  <img src="https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=three.js&logoColor=white" alt="Three.js">  
+  <img src="https://img.shields.io/badge/WebGL-990000?style=for-the-badge&logo=webgl&logoColor=white" alt="WebGL">  
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5">  
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">  
+  <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white" alt="Git">  
+  <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">  
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">  
+  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js">  
 </div>  
 
 ---
 
-## **Certifications**  
-- **Microsoft Power BI Data Analyst Professional Certificate**, Microsoft (2024)  
-- **Databases and SQL for Data Science with Python**, IBM (2024)  
-- **Machine Learning Specialization**, Deeplearning.ai, Stanford (2024)  
+##  Featured Projects  
 
----  
+ **[Auro Studio](https://github.com/Lourdhu02/aurostudio.git)**  
+Responsive web application built with **React.js, Next.js, and Tailwind CSS**.  
+- Implemented **Framer Motion animations** for better UI/UX  
+- Enhanced **SEO & performance optimization**  
+- Developed **reusable, cross-browser compatible components**  
+
+ **[Blockpluse](https://github.com/Lourdhu02/blockpluse.git)**  
+Interactive blockchain-based web app using **React.js** and **Three.js**.  
+- Designed immersive **3D visualizations**  
+- Focused on **UI/UX and frontend scalability**  
+- Optimized rendering for **real-time performance**  
+
+ **[Portfolio Website](https://github.com/Lourdhu02/lourdu-portfolio.git)**  
+Personal portfolio showcasing skills and projects, built with **Next.js, React.js, Tailwind CSS, Framer Motion, and Three.js**.  
+- Created a **modern and responsive design**  
+- Added **animations and 3D effects** for interactivity  
+- Structured for **SEO and recruiter discoverability**  
+
+---
+
+##  Certifications  
+- **Meta Frontend Developer – Professional Certificate (Coursera)**  
+- **Machine Learning – Stanford University (Coursera)**  
+- **IBM SQL Fundamentals (Coursera)**  
+
+---
+
+ **Let’s connect on [LinkedIn](https://www.linkedin.com/in/lourdhu) and collaborate on exciting frontend projects!**
