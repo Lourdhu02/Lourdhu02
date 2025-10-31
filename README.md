@@ -1,66 +1,119 @@
-# 👋 Hi there, I'm **Lourdhu Raju**  
-
-## About Me  
-I’m a passionate **Frontend Developer** specializing in **React.js** and **Next.js**, with expertise in building **high-performance, scalable, and user-centric web applications**.  
-I enjoy crafting clean, modern UIs, integrating animations, and delivering seamless user experiences.  
-
--  Currently working on **React.js, Next.js, and UI/UX-focused projects**  
--  Strong focus on **performance optimization, responsive design, and accessibility**  
--  Open to collaborations on **Frontend Development, UI/UX Engineering, and Web Animations**  
--  Reach me at: [Email](mailto:b.lourdhuraju1234@gmail.com)  
--  Fun fact: I enjoy designing **interactive UIs** and experimenting with **3D web visualizations**  
+# Hi, I'm **Lourdu Raju**
+**Machine Learning Engineer | Deep Learning | NLP | Computer Vision**
 
 ---
 
-## Skills & Technologies  
+## About Me
+Passionate **Machine Learning** Engineer with strong expertise in building, training, and deploying end-to-end machine learning solutions.
+I specialize in Deep Learning, NLP, Computer Vision, MLOps, and scalable data pipelines.
+Focused on delivering production-grade ML systems, model optimization, and robust engineering practices.
 
-<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">  
-  <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React">  
-  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js">  
-  <img src="https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">  
-  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">  
-  <img src="https://img.shields.io/badge/TailwindCSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">  
-  <img src="https://img.shields.io/badge/MaterialUI-007FFF?style=for-the-badge&logo=mui&logoColor=white" alt="Material UI">  
-  <img src="https://img.shields.io/badge/FramerMotion-0055FF?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion">  
-  <img src="https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=three.js&logoColor=white" alt="Three.js">  
-  <img src="https://img.shields.io/badge/WebGL-990000?style=for-the-badge&logo=webgl&logoColor=white" alt="WebGL">  
-  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5">  
-  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3">  
-  <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white" alt="Git">  
-  <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">  
-  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">  
-  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js">  
-</div>  
+I also have solid experience in **Data Science**, covering advanced EDA, statistical modeling, feature engineering, forecasting, and data visualization to derive clear, actionable insights.
+On the AI side, I work across the full AI lifecycle — from data pipelines and model development to deployment, monitoring, and continuous improvement — ensuring AI systems are accurate, scalable, and **business-driven**.
+
+Bengaluru, Karnataka  
+**b.lourdhuraju1234@gmail.com**  
+**LinkedIn:** https://www.linkedin.com/in/lourdhu  
+**GitHub:** https://github.com/lourdhu02  
 
 ---
 
-##  Featured Projects  
+## Technical Skills
 
- **[Auro Studio](https://github.com/Lourdhu02/aurostudio.git)**  
-Responsive web application built with **React.js, Next.js, and Tailwind CSS**.  
-- Implemented **Framer Motion animations** for better UI/UX  
-- Enhanced **SEO & performance optimization**  
-- Developed **reusable, cross-browser compatible components**  
+<p align="left">
 
- **[Blockpluse](https://github.com/Lourdhu02/blockpluse.git)**  
-Interactive blockchain-based web app using **React.js** and **Three.js**.  
-- Designed immersive **3D visualizations**  
-- Focused on **UI/UX and frontend scalability**  
-- Optimized rendering for **real-time performance**  
+  <!-- Programming -->
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" height="60" style="margin-right:20px;"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/r/r-original.svg" height="60" style="margin-right:20px;"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/cplusplus/cplusplus-original.svg" height="60" style="margin-right:20px;"/>
+  <img src="https://www.vectorlogo.zone/logos/postgresql/postgresql-icon.svg" height="60" style="margin-right:20px;"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mysql/mysql-original.svg" height="60" style="margin-right:20px;"/>
 
- **[Portfolio Website](https://github.com/Lourdhu02/lourdu-portfolio.git)**  
-Personal portfolio showcasing skills and projects, built with **Next.js, React.js, Tailwind CSS, Framer Motion, and Three.js**.  
-- Created a **modern and responsive design**  
-- Added **animations and 3D effects** for interactivity  
-- Structured for **SEO and recruiter discoverability**  
+  <!-- ML Frameworks -->
+  <img src="https://www.vectorlogo.zone/logos/tensorflow/tensorflow-icon.svg" height="60" style="margin-right:20px;"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/pytorch/pytorch-original.svg" height="60" style="margin-right:20px;"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/scikitlearn/scikitlearn-original.svg" height="60" style="margin-right:20px;"/>
+
+  <!-- Hugging Face -->
+  <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" height="60" style="margin-right:20px;"/>
+
+  <!-- Computer Vision -->
+  <img src="https://raw.githubusercontent.com/opencv/opencv/master/doc/opencv-logo.png" height="60" style="margin-right:20px;"/>
+
+  <!-- Data Engineering -->
+  <img src="https://www.vectorlogo.zone/logos/apache_spark/apache_spark-icon.svg" height="60" style="margin-right:20px;"/>
+
+  <!-- Cloud & MLOps -->
+  <img src="https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-icon.svg" height="60" style="margin-right:20px;"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original.svg" height="60" style="margin-right:20px;"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/kubernetes/kubernetes-plain.svg" height="60" style="margin-right:20px;"/>
+  <img src="https://www.vectorlogo.zone/logos/jenkins/jenkins-icon.svg" height="60" style="margin-right:20px;"/>
+
+  <!-- Tools -->
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/vscode/vscode-original.svg" height="60" style="margin-right:20px;"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/github/github-original.svg" height="60" style="margin-right:20px;"/>
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/linux/linux-original.svg" height="60" style="margin-right:20px;"/>
+
+  <!-- Visualization -->
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/plotly/plotly-original.svg" height="60" style="margin-right:20px;"/>
+  <img src="https://raw.githubusercontent.com/microsoft/PowerBI-Icons/main/SVG/Power-BI.svg" height="60" style="margin-right:20px;"/>
+
+  <!-- NoSQL -->
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mongodb/mongodb-original.svg" height="60" style="margin-right:20px;"/>
+
+</p>
 
 ---
 
-##  Certifications  
-- **Meta Frontend Developer – Professional Certificate (Coursera)**  
-- **Machine Learning – Stanford University (Coursera)**  
-- **IBM SQL Fundamentals (Coursera)**  
+## Experience
+
+### Data Science Intern – BrainOvision Solutions Pvt. Ltd. (Feb–Apr 2024)
+- Improved forecasting accuracy by **15%** through ML optimization.  
+- Performed extensive EDA, preprocessing, and feature engineering.  
+- Built predictive models for real business use cases.
+
+### Machine Learning Intern – Indian Servers (Apr–Jun 2023)
+- Built NLP models improving text analysis accuracy by **20%**.  
+- Developed BERT-based sentiment & emotion detection systems.  
+- Enhanced overall model performance and evaluation workflows.
 
 ---
 
- **Let’s connect on [LinkedIn](https://www.linkedin.com/in/lourdhu) and collaborate on exciting frontend projects!**
+## Featured Projects
+
+### Advanced NLP Sentiment & Emotion Detection
+- Built with **Hugging Face Transformers**  
+- Achieved **18% improvement** in analysis accuracy  
+
+### Predictive Maintenance System
+- Multivariate time-series forecasting (equipment failure prediction)  
+- Reduced downtime by **25%** and cost by **20%**
+
+### Real-Time Person Detection (Computer Vision)
+- CNN-based person detection + tracking  
+- Increased monitoring efficiency by **30%**
+
+---
+
+## Certifications
+- Machine Learning Specialization – DeepLearning.AI (Stanford)  
+- Data Science Using Python – NPTEL (IIT)  
+- IBM SQL Fundamentals – Coursera  
+
+---
+
+## Let's Connect
+
+<p align="left">
+  <a href="mailto:b.lourdhuraju1234@gmail.com">
+    <img src="https://www.vectorlogo.zone/logos/gmail/gmail-icon.svg" height="45" style="margin-right:20px;"/>
+  </a>
+  <a href="https://www.linkedin.com/in/lourdhu">
+    <img src="https://www.vectorlogo.zone/logos/linkedin/linkedin-icon.svg" height="45" style="margin-right:20px;"/>
+  </a>
+  <a href="https://github.com/lourdhu02">
+    <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/github/github-original.svg" height="45" style="margin-right:20px;"/>
+  </a>
+</p>
+
+---
