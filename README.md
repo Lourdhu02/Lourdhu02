@@ -6,7 +6,7 @@
 
 Deep Learning · NLP · Computer Vision · LLMs · MLOps
 
-[b.lourdhuraju1234@gmail.com](mailto:b.lourdhuraju1234@gmail.com) · [LinkedIn](https://www.linkedin.com/in/lourdhu) · [GitHub](https://github.com/lourdhu02)
+[b.lourdhuraju1234@gmail.com](mailto:b.lourdhuraju1234@gmail.com) · [LinkedIn](https://www.linkedin.com/in/lourdhu) · [GitHub](https://github.com/Lourdhu02)
 
 </div>
 
@@ -98,17 +98,13 @@ IBM SQL Fundamentals — Coursera
 ## GitHub Stats
 <div align="center">
 
-<!-- Stats Card - using vercel deployment with cache param -->
-![GitHub Stats](https://github-readme-stats.vercel.app/api?username=lourdhu02&show_icons=true&hide_border=true&include_all_commits=true&count_private=true&theme=default&cache_seconds=1800)
+![GitHub Stats](https://github-readme-stats.vercel.app/api?username=Lourdhu02&show_icons=true&hide_border=true&include_all_commits=true&count_private=true&theme=default)
 
-<!-- Top Languages -->
-![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=lourdhu02&layout=compact&hide_border=true&theme=default&langs_count=8&cache_seconds=1800)
+![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=Lourdhu02&layout=compact&hide_border=true&theme=default&langs_count=8)
 
-<!-- Streak Stats - demolab is the official maintained one -->
-![GitHub Streak](https://streak-stats.demolab.com/?user=lourdhu02&theme=default&hide_border=true)
+![GitHub Streak](https://streak-stats.demolab.com/?user=Lourdhu02&hide_border=true)
 
-<!-- Trophies -->
-![GitHub Trophies](https://github-profile-trophy.vercel.app/?username=lourdhu02&theme=flat&no-bg=true&no-frame=true&margin-w=8&row=1)
+![GitHub Trophies](https://github-profile-trophy.vercel.app/?username=Lourdhu02&theme=flat&no-bg=true&no-frame=true&margin-w=8&row=1)
 
 </div>
 
