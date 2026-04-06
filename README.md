@@ -65,25 +65,48 @@ Built BERT-based NLP pipelines for sentiment and emotion classification. Improve
 ## Stack
 
 **Languages**
-Python · C++ · R · SQL
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![C++](https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
+![R](https://img.shields.io/badge/R-276DC3?style=for-the-badge&logo=r&logoColor=white)
+![SQL](https://img.shields.io/badge/SQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 
-**Machine Learning and Deep Learning**
-PyTorch · TensorFlow · scikit-learn · HuggingFace Transformers · OpenCV · XGBoost · LightGBM
+**ML / DL**
+![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)
+![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white)
+![HuggingFace](https://img.shields.io/badge/HuggingFace-FDEE21?style=for-the-badge&logo=huggingface&logoColor=black)
+![XGBoost](https://img.shields.io/badge/XGBoost-189fdd?style=for-the-badge&logo=xgboost&logoColor=white)
 
-**LLMs and Generative AI**
-LangChain · vLLM · Ollama · Groq · OpenAI API · Prompt Engineering · RAG · Fine-tuning (LoRA / QLoRA)
+**LLMs & GenAI**
+![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-F55036?style=for-the-badge&logo=groq&logoColor=white)
 
-**Vector Search and Embeddings**
-Pinecone · ChromaDB · FAISS · sentence-transformers
+**Vector DB & Embeddings**
+![Pinecone](https://img.shields.io/badge/Pinecone-000000?style=for-the-badge&logo=pinecone&logoColor=white)
+![ChromaDB](https://img.shields.io/badge/ChromaDB-FF6719?style=for-the-badge&logo=chroma&logoColor=white)
 
-**MLOps and Infrastructure**
-MLflow · Docker · Kubernetes · Apache Spark · AWS (EC2, S3, SageMaker) · Model Monitoring · DVC
+**MLOps & Infra**
+![MLflow](https://img.shields.io/badge/MLflow-0194E2?style=for-the-badge&logo=mlflow&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazonwebservices&logoColor=white)
+![Apache Spark](https://img.shields.io/badge/Apache_Spark-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white)
 
-**Backend and Data Engineering**
-FastAPI · PostgreSQL · MongoDB · Redis · SQLAlchemy · Alembic · Pydantic · APScheduler
+**Backend & Data**
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 
 **Tools**
-Git · Linux · Jupyter · Weights and Biases
+![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
+![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+![Weights & Biases](https://img.shields.io/badge/Weights_&_Biases-FFBE00?style=for-the-badge&logo=weightsandbiases&logoColor=black)
+![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=for-the-badge&logo=jupyter&logoColor=white)
+
 
 ---
 
@@ -96,17 +119,9 @@ IBM SQL Fundamentals — Coursera
 ---
 
 ## GitHub Stats
-<div align="center">
+![](https://github-profile-summary-cards.vercel.app/api/cards/stats?username=lourdhu02&theme=default) ![](https://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=lourdhu02&theme=default) ![](https://github-profile-summary-cards.vercel.app/api/cards/most-commit-language?username=lourdhu02&theme=default)
 
-![GitHub Stats](https://github-readme-stats.vercel.app/api?username=Lourdhu02&show_icons=true&hide_border=true&include_all_commits=true&count_private=true&theme=default)
-
-![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=Lourdhu02&layout=compact&hide_border=true&theme=default&langs_count=8)
-
-![GitHub Streak](https://streak-stats.demolab.com/?user=Lourdhu02&hide_border=true)
-
-![GitHub Trophies](https://github-profile-trophy.vercel.app/?username=Lourdhu02&theme=flat&no-bg=true&no-frame=true&margin-w=8&row=1)
-
-</div>
+![GitHub Streak](https://streak-stats.demolab.com/?user=lourdhu02&hide_border=true)
 
 ---
 
