@@ -51,6 +51,9 @@ You define your stack. NoiseCut ingests Hacker News, GitHub Trending, ArXiv, and
 **Machine Learning Engineer — Sujanix Pvt. Ltd.** *(2026 – Present)*
 Designing, training, and deploying ML models for production systems. Building scalable inference pipelines and optimized data workflows. Owning model performance, monitoring, and continuous optimization in live environments.
 
+**Founder — SpaceDrift** *(Aug 2024 – Dec 2025)*
+Founded and operated SpaceDrift, an MSME-registered sole proprietorship. Delivered end-to-end engineering project builds, professional data annotation services, and research support to PhD scholars. Worked directly with graduate researchers on ML-adjacent problem framing, dataset curation, and experimental pipelines.
+
 **Data Science Intern — BrainOvision Solutions Pvt. Ltd.** *(Feb 2024 – Apr 2024)*
 Improved forecasting accuracy by **15%** through structured feature engineering. Conducted advanced EDA and statistical modeling for real business use cases.
 
@@ -100,11 +103,11 @@ IBM SQL Fundamentals — Coursera
 </p>
 
 <p align="center">
-  <img height="160" src="https://streak-stats.demolab.com/?user=lourdhu02&hide_border=true&theme=default" />
+  <img height="160" src="https://github-readme-streak-stats-eight.vercel.app?user=lourdhu02&hide_border=true&theme=default" />
 </p>
 
 <p align="center">
-  <img src="https://github-readme-activity-graph.vercel.app/graph?username=lourdhu02&theme=minimal&hide_border=true&area=true" />
+  <img src="https://github-profile-trophy.vercel.app/?username=lourdhu02&theme=flat&no-bg=true&no-frame=true&margin-w=8" />
 </p>
 
 ---
