@@ -97,18 +97,14 @@ IBM SQL Fundamentals — Coursera
 
 ## GitHub Stats
 
-<p align="center">
-  <img height="160" src="https://github-readme-stats.vercel.app/api?username=lourdhu02&show_icons=true&hide_border=true&include_all_commits=true&count_private=true&rank_icon=github&theme=default" />
-  <img height="160" src="https://github-readme-stats.vercel.app/api/top-langs/?username=lourdhu02&layout=compact&hide_border=true&theme=default&langs_count=8" />
-</p>
+![GitHub Stats](https://github-readme-stats-six-retrace.vercel.app/api?username=lourdhu02&show_icons=true&hide_border=true&include_all_commits=true&count_private=true&rank_icon=github&theme=default)
+![Top Langs](https://github-readme-stats-six-retrace.vercel.app/api/top-langs/?username=lourdhu02&layout=compact&hide_border=true&theme=default&langs_count=8)
 
-<p align="center">
-  <img height="160" src="https://github-readme-streak-stats-eight.vercel.app?user=lourdhu02&hide_border=true&theme=default" />
-</p>
+![GitHub Streak](https://github-readme-streak-stats.herokuapp.com/?user=lourdhu02&theme=default&hide_border=true)
 
-<p align="center">
-  <img src="https://github-profile-trophy.vercel.app/?username=lourdhu02&theme=flat&no-bg=true&no-frame=true&margin-w=8" />
-</p>
+![GitHub Trophies](https://github-profile-trophy.vercel.app/?username=lourdhu02&theme=flat&no-bg=true&no-frame=true&margin-w=8)
+
+</div>
 
 ---
 
