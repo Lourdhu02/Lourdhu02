@@ -1,128 +1,89 @@
-<div>
+<!-- Paste contents below to github.com/Lourdhu02/Lourdhu02/README.md (your profile repo). -->
 
 # Lourdu Raju
 
-**Machine Learning Engineer**
+**Machine Learning Engineer — GenAI · Production AI**
 
-Deep Learning · NLP · Computer Vision · LLMs · MLOps
+> I build AI systems where accuracy, latency, and cost have to be right at the same time. RAG, agents, and LLM apps that survive contact with real users.
 
-[b.lourdhuraju1234@gmail.com](mailto:b.lourdhuraju1234@gmail.com) · [LinkedIn](https://www.linkedin.com/in/lourdhu) · [GitHub](https://github.com/Lourdhu02)
-
-</div>
+Bengaluru, India · [b.lourdhuraju1234@gmail.com](mailto:b.lourdhuraju1234@gmail.com) · [LinkedIn](https://www.linkedin.com/in/lourdhu) · [Kaggle](https://www.kaggle.com/blourdhuraju)
 
 ---
 
-I design and deploy robust, scalable AI systems in real-world production environments. My work spans the full ML lifecycle — data engineering, model development, inference optimization, and production monitoring. I operate at the intersection of research and engineering, where accuracy, efficiency, and reliability are non-negotiable.
+## Now
+
+**Machine Learning Engineer · Sujanix Pvt. Ltd. · Bengaluru** — *Jan 2026 – present*
+
+Production OCR at scale for government utility automation. Architected Transformer-based pipelines on **SVRT** (a Swin-V2-based regression transformer); improved exact-match accuracy by **2.74% to 97%** via a custom **FocalCTCLoss** addressing class imbalance. Deployed via INT8 ONNX on AWS Lambda + FastAPI — 30% inference-cost reduction at 99.9% uptime.
 
 ---
 
-## Currently
+## Selected Projects
 
-**Machine Learning Engineer — Sujanix Pvt. Ltd., Bengaluru** *(2026 – Present)*
+### [ECHOME](https://github.com/Lourdhu02/echome) — Cognitive Mirror Engine
+Autonomous agentic AI on **LangGraph** with a three-tier memory architecture (Episodic · Semantic · Procedural) for long-horizon reasoning. CAT/IRT psychometrics with Fisher Information maximization reduced assessment time **70%** (30 min → 9 min). Privacy-first local deployment; XTTSv2 zero-shot voice cloning.
 
-Working on production-level computer vision systems. Improved analog meter dial detection accuracy by **7 percentage points in production**, bringing the deployed system to **94% accuracy**. Responsible for scalable inference pipelines, data workflow architecture, and end-to-end model reliability in live environments.
+`LangGraph` · `CAT/IRT` · `Fisher Information` · `XTTSv2` · `3-tier memory`
 
----
+### [FinSentinelAI](https://github.com/Lourdhu02/fin-sentinal.ai) — Privacy-First Enterprise RAG
+Production financial document intelligence for regulated customers. Local LLMs via **Ollama** with **ChromaDB** for full data sovereignty. JWT-based multi-tenant session isolation. Multi-modal extraction from PDFs and bank statements via local VLMs.
 
-## Projects
+`Ollama` · `ChromaDB` · `VLM` · `JWT multi-tenant`
 
-### MARKIQ — Academic Companion Platform
+### [Transformers-OCR](https://github.com/Lourdhu02/transformers-ocr) — Industrial OCR
+**97% exact-match accuracy** on numeric meter datasets via an **SVTR** backbone, custom **Feature Rearrangement Modules**, and **FocalCTCLoss**. ONNX INT8 quantization for edge deployment. Custom Semantic Guidance Modules for robustness in motion-blur and low-contrast environments.
 
-Production-level academic companion built for AP and TS engineering students. Target: 1000 students. Infrastructure cost: zero.
-
-Students authenticate via Google, upload marksheet images, and the system extracts subject scores automatically through a PaddleOCR + Groq LLM pipeline engineered to handle messy OCR output, handwritten elements, and the varied marksheet formats across AP and TS colleges. The platform tracks performance over time, surfaces an AI chat companion that reasons directly over each student's actual marks, delivers personalized push notifications for exams and motivation, and scrapes board announcements in real time. Every constraint is verified against free tier limits. Designed to run at full capacity without spending a rupee.
-
-`Python` `FastAPI` `PaddleOCR` `Groq` `LLaMA 3.1` `PostgreSQL` `Redis` `Cloudinary` `React Native` `Expo` `Google OAuth2` `APScheduler` `SQLAlchemy` `Alembic` `JWT`
-
----
-
-### NoiseCut — Real-Time Tech Intelligence
-
-Self-hosted intelligence tool for engineers who cannot afford to follow 6+ sources daily just to stay current.
-
-You define your stack. NoiseCut ingests Hacker News, GitHub Trending, ArXiv, and Dev.to on a configurable schedule, passes every item through an LLM relevance pipeline scored against your profile, and surfaces only what matters — tool updates, breaking changes, research papers, and trending repos in your domain. Semantic search over all ingested history. Breaking change alerts pushed via WebSocket in real time. Daily digest delivered via Telegram bot. Swap between local Ollama and Groq with a single environment flag. Zero cost. Fully open source. Runs on CPU.
-
-`Python` `FastAPI` `LangChain` `Ollama` `Mistral 7B Q4` `Groq` `ChromaDB` `sentence-transformers` `PostgreSQL` `Redis` `APScheduler` `Docker` `Nginx` `React` `Vite` `WebSockets`
+`SVTR` · `FocalCTCLoss` · `ONNX INT8` · `FRM`
 
 ---
 
 ## Experience
 
-**Machine Learning Engineer — Sujanix Pvt. Ltd.** *(2026 – Present)*
-Designing, training, and deploying ML models for production systems. Building scalable inference pipelines and optimized data workflows. Owning model performance, monitoring, and continuous optimization in live environments.
+**Sujanix Pvt. Ltd.** — ML Engineer · *Jan 2026 – present*
+Production OCR pipelines, scalable inference, end-to-end model reliability.
 
-**Founder — SpaceDrift** *(Aug 2024 – Dec 2025)*
-Founded and operated SpaceDrift, an MSME-registered sole proprietorship. Delivered end-to-end engineering project builds, professional data annotation services, and research support to PhD scholars. Worked directly with graduate researchers on ML-adjacent problem framing, dataset curation, and experimental pipelines.
+**SpaceDrift** — Founder · *Aug 2024 – Dec 2025*
+MSME-registered sole proprietorship. Delivered engineering builds, data annotation services, and research support to PhD scholars (problem framing, dataset curation, experimental pipelines). Engaged paid contractors on a per-project basis when workload exceeded solo capacity.
 
-**Data Science Intern — BrainOvision Solutions Pvt. Ltd.** *(Feb 2024 – Apr 2024)*
-Improved forecasting accuracy by **15%** through structured feature engineering. Conducted advanced EDA and statistical modeling for real business use cases.
-
-**Machine Learning Intern — Indian Servers** *(Apr 2023 – Jun 2023)*
-Built BERT-based NLP pipelines for sentiment and emotion classification. Improved model accuracy by **20%** over baseline.
+**BrainOvision Solutions** — Data Science Intern · *Feb 2024 – Apr 2024*
+Improved forecasting accuracy by **15%** through ensemble gradient boosting and structured feature engineering.
 
 ---
 
 ## Stack
 
-**Languages**
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![C++](https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
-![R](https://img.shields.io/badge/R-276DC3?style=for-the-badge&logo=r&logoColor=white)
-![SQL](https://img.shields.io/badge/SQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-
-**ML / DL**
-![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
-![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white)
-![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white)
-![HuggingFace](https://img.shields.io/badge/HuggingFace-FDEE21?style=for-the-badge&logo=huggingface&logoColor=black)
-![XGBoost](https://img.shields.io/badge/XGBoost-189fdd?style=for-the-badge&logo=xgboost&logoColor=white)
-
-**LLMs & GenAI**
-![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)
-![Ollama](https://img.shields.io/badge/Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white)
-![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
-![Groq](https://img.shields.io/badge/Groq-F55036?style=for-the-badge&logo=groq&logoColor=white)
-
-**Vector DB & Embeddings**
-![Pinecone](https://img.shields.io/badge/Pinecone-000000?style=for-the-badge&logo=pinecone&logoColor=white)
-![ChromaDB](https://img.shields.io/badge/ChromaDB-FF6719?style=for-the-badge&logo=chroma&logoColor=white)
-
-**MLOps & Infra**
-![MLflow](https://img.shields.io/badge/MLflow-0194E2?style=for-the-badge&logo=mlflow&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
-![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazonwebservices&logoColor=white)
-![Apache Spark](https://img.shields.io/badge/Apache_Spark-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white)
-
-**Backend & Data**
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
-
-**Tools**
-![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
-![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
-![Weights & Biases](https://img.shields.io/badge/Weights_&_Biases-FFBE00?style=for-the-badge&logo=weightsandbiases&logoColor=black)
-![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=for-the-badge&logo=jupyter&logoColor=white)
-
+**Core** — Python · SQL · C++
+**ML/DL** — PyTorch · TensorFlow · scikit-learn · Hugging Face · OpenCV · XGBoost
+**GenAI/LLM** — LangChain · LangGraph · Ollama · vLLM · Groq · OpenAI
+**Retrieval** — ChromaDB · Qdrant · Pinecone · sentence-transformers
+**Serving & Infra** — FastAPI · Docker · Kubernetes · AWS (EC2 · Lambda · S3 · SageMaker) · ONNX · TensorRT
+**Data** — PostgreSQL · MongoDB · Redis
+**MLOps** — MLflow · Weights & Biases · DVC · Git · Linux
 
 ---
 
-## Certifications
+## Recognition
 
-Machine Learning Specialization — DeepLearning.AI / Stanford University
-Data Science Using Python — NPTEL / IIT
-IBM SQL Fundamentals — Coursera
-
----
-
-## GitHub Stats
-![](https://github-profile-summary-cards.vercel.app/api/cards/stats?username=lourdhu02&theme=default) ![](https://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=lourdhu02&theme=default) ![](https://github-profile-summary-cards.vercel.app/api/cards/most-commit-language?username=lourdhu02&theme=default)
-
-![GitHub Streak](https://streak-stats.demolab.com/?user=lourdhu02&hide_border=true)
+- **Kaggle Expert** (Notebooks tier) — deep learning competitions
+- **Machine Learning Specialization** — DeepLearning.AI / Stanford
+- **Data Science using Python** — NPTEL / IIT Madras
 
 ---
 
-*Open to collaborating on applied machine learning, deep learning systems, and production ML engineering. If the problem requires strong engineering discipline and precise ML, reach out.*
+## Building Next
+
+- Production RAG evaluation framework — public benchmark + leaderboard
+- Agent benchmark for Indian-language tasks
+- Open-source contributions to **vLLM**, **TRL**, **LlamaIndex** *(2026 H2)*
+
+---
+
+![GitHub Streak](https://streak-stats.demolab.com/?user=Lourdhu02&hide_border=true)
+
+---
+
+## Reach out
+
+Open to roles and collaborations in **applied ML, agentic AI, RAG systems, LLM inference, and production GenAI**.
+
+[b.lourdhuraju1234@gmail.com](mailto:b.lourdhuraju1234@gmail.com) · [LinkedIn](https://www.linkedin.com/in/lourdhu)
