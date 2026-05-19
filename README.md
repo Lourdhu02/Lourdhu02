@@ -14,7 +14,7 @@ Bengaluru, India · [b.lourdhuraju1234@gmail.com](mailto:b.lourdhuraju1234@gmail
 
 **Machine Learning Engineer · Sujanix Pvt. Ltd. · Bengaluru** — *Jan 2026 – present*
 
-Production OCR at scale for government utility automation. Architected Transformer-based pipelines on **SVRT** (a Swin-V2-based regression transformer); improved exact-match accuracy by **2.74% to 97%** via a custom **FocalCTCLoss** addressing class imbalance. Deployed via INT8 ONNX on AWS Lambda + FastAPI — 30% inference-cost reduction at 99.9% uptime.
+Production OCR at scale for government utility automation. Architected Transformer-based pipelines on **SVRT** (a Swin-V2-based regression transformer); improved exact-match accuracy by **82.74% to 97.04%** via a custom **FocalCTCLoss** addressing class imbalance. Deployed via INT8 ONNX on AWS Lambda + FastAPI — 30% inference-cost reduction at 99.9% uptime.
 
 ---
 
