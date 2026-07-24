@@ -87,3 +87,6 @@ Improved forecasting accuracy by **15%** through ensemble gradient boosting and 
 Open to roles and collaborations in **applied ML, agentic AI, RAG systems, LLM inference, and production GenAI**.
 
 [b.lourdhuraju1234@gmail.com](mailto:b.lourdhuraju1234@gmail.com) · [LinkedIn](https://www.linkedin.com/in/lourdhu)
+
+## About Me
+Developer, ML enthusiast
