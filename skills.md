@@ -1,9 +1,0 @@
-# Skills
-## Programming
-- Python
-- JavaScript
-- SQL
-## ML/AI
-- PyTorch
-- TensorFlow
-- LangChain

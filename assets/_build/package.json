@@ -1,0 +1,17 @@
+{
+  "name": "readme-assets",
+  "private": true,
+  "description": "Generates the SVG cards and 3D renders used by the profile README.",
+  "type": "module",
+  "scripts": {
+    "render": "node render.mjs all",
+    "preview": "node preview.mjs"
+  },
+  "dependencies": {
+    "inter-ui": "4.1.1",
+    "jetbrains-mono": "1.0.6",
+    "playwright-core": "1.56.1",
+    "simple-icons": "16.32.0",
+    "three": "0.170.0"
+  }
+}
