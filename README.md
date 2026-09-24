@@ -10,7 +10,7 @@
 
 <br>
 
-<img src="assets/impact.svg" width="100%" alt="By the numbers. Accuracy: 79% to 91% exact-match meter readings on a fixed 3,965-image test set. Latency: 9x lower end-to-end p50, 1,415 ms to 156 ms. Capacity: 181 images per second sustained on one L4 GPU, 12.6x the production peak. Optimization: 94x classifier speed-up, ONNX Runtime 309.5 ms to TensorRT 3.3 ms.">
+<img src="assets/impact.svg" width="100%" alt="By the numbers. Accuracy: 79% to 91% on live traffic, measured over 40M production readings. Latency: 9x lower end-to-end p50, 1,415 ms to 156 ms. Capacity: 181 images per second sustained on one L4 GPU, 12.6x the production peak. Optimization: 94x classifier speed-up, ONNX Runtime 309.5 ms to TensorRT 3.3 ms.">
 
 <img src="assets/pipeline.svg" width="100%" alt="Production at Sujanix: meter-reading OCR for a state electricity utility. Photo, then meter presence (MobileViTv2), dial detection (YOLO26n-OBB), digital or analog (MobileViTv2), OCR (SVTRv2 + CTC), reading. Served on Triton with 9 TensorRT FP16 engines on an NVIDIA L4, behind a canary router with automatic fallback to serverless. 330K requests on the busiest day.">
 
@@ -37,7 +37,8 @@
 <summary><b>How these numbers were measured</b></summary>
 <br>
 
-- **Accuracy:** exact match of the whole reading, leading zeros ignored, on a fixed labelled set of 3,965 photos. The set has 2,950 meter photos (1,000 digital, 450 digital with decimals, 1,000 low-quality, 500 analog) and 1,015 non-meter photos, where the correct answer is "no reading". Every version is scored on the same images, and the 79% → 91% headline uses this set. The serverless release figures use only the 2,950 meter photos.
+- **Headline accuracy (79% → 91%):** measured on live production traffic over 40M meter readings, not on a test set.
+- **Test-set accuracy** (the release and retraining figures): exact match of the whole reading, leading zeros ignored, on a fixed labelled set of 3,965 photos. The set has 2,950 meter photos (1,000 digital, 450 digital with decimals, 1,000 low-quality, 500 analog) and 1,015 non-meter photos, where the correct answer is "no reading". Every version is scored on the same images. The serverless release figures use only the 2,950 meter photos.
 - **Latency:** end to end from an office network, with all 3,965 photos sent through each path. GPU path: p50 156 ms, p95 205 ms. Serverless: p50 1,415 ms, p95 1,714 ms.
 - **Capacity:** a stepped load test of 67,719 requests against one g6.2xlarge (NVIDIA L4). "Sustained" means p95 ≤ 1 s with ≤ 0.5% errors. The production peak (14.4 requests/s) and the busiest day (330,707 requests) come from CloudWatch.
 - **TensorRT:** the timings are model compute inside Triton. The p50 and throughput figures are single-image requests at 16 concurrent on a GB10.
