@@ -1,0 +1,337 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#fff}canvas{display:block}</style>
+<script type="importmap">
+{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}
+</script>
+</head>
+<body>
+<script type="module">
+// 3D studio for the profile README: every model is built from primitives in a
+// white-clay / black / red palette, lit by a soft studio environment, and
+// rendered frame by frame (t in [0,1) is one seamless loop).
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+const TAU = Math.PI * 2;
+const RED = 0xe10600;
+
+let renderer, scene, camera, model, ground, key;
+
+const M = {};
+function makeMaterials() {
+  M.clay = new THREE.MeshPhysicalMaterial({ color: 0xf2f2f0, roughness: 0.6, clearcoat: 0.3, clearcoatRoughness: 0.45 });
+  M.clay2 = new THREE.MeshPhysicalMaterial({ color: 0xdcdcd9, roughness: 0.66, clearcoat: 0.15, clearcoatRoughness: 0.5 });
+  M.ink = new THREE.MeshPhysicalMaterial({ color: 0x101012, roughness: 0.36, clearcoat: 0.8, clearcoatRoughness: 0.22 });
+  M.inkMatte = new THREE.MeshStandardMaterial({ color: 0x19191b, roughness: 0.85 });
+  M.red = new THREE.MeshPhysicalMaterial({ color: RED, roughness: 0.4, clearcoat: 0.7, clearcoatRoughness: 0.25 });
+  M.redGlow = new THREE.MeshStandardMaterial({ color: RED, emissive: RED, emissiveIntensity: 0.9, roughness: 0.35 });
+  M.metal = new THREE.MeshStandardMaterial({ color: 0xb4b4b2, roughness: 0.32, metalness: 0.85 });
+  M.groove = new THREE.MeshStandardMaterial({ color: 0xc9c9c6, roughness: 0.9 });
+  M.white = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 });
+}
+
+function mesh(geo, mat, { cast = true } = {}) {
+  const m = new THREE.Mesh(geo, mat);
+  m.castShadow = cast;
+  m.receiveShadow = false;
+  return m;
+}
+
+// A cylinder whose axis runs from a to b.
+function rod(a, b, radius, mat, seg = 24) {
+  const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b);
+  const len = A.distanceTo(B);
+  const m = mesh(new THREE.CylinderGeometry(radius, radius, len, seg), mat);
+  m.position.copy(A.clone().add(B).multiplyScalar(0.5));
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), B.clone().sub(A).normalize());
+  return m;
+}
+
+// ---------- LCD texture: seven-segment digits, with faint unlit segments ----------
+const SEGS = { 0: 'abcdef', 1: 'bc', 2: 'abged', 3: 'abgcd', 4: 'fgbc', 5: 'afgcd', 6: 'afgedc', 7: 'abc', 8: 'abcdefg', 9: 'abfgcd' };
+function segPolys(x, y, w, h, t) {
+  // Returns hexagonal segment polygons for one digit cell (origin top-left).
+  const hs = t / 2, g = t * 0.22;
+  const H = (x1, y1, x2) => [[x1 + hs + g, y1], [x2 - hs - g, y1], [x2 - g, y1 + hs], [x2 - hs - g, y1 + t], [x1 + hs + g, y1 + t], [x1 + g, y1 + hs]];
+  const V = (x1, y1, y2) => [[x1 + hs, y1 + g], [x1 + t, y1 + hs + g], [x1 + t, y2 - hs - g], [x1 + hs, y2 - g], [x1, y2 - hs - g], [x1, y1 + hs + g]];
+  const mid = y + h / 2 - t / 2;
+  return {
+    a: H(x, y, x + w), g: H(x, mid, x + w), d: H(x, y + h - t, x + w),
+    f: V(x, y, mid + t / 2), b: V(x + w - t, y, mid + t / 2),
+    e: V(x, mid + t / 2, y + h), c: V(x + w - t, mid + t / 2, y + h),
+  };
+}
+async function lcdTexture(text) {
+  const font = new FontFace('InterLCD', 'url(/node_modules/inter-ui/web/Inter-SemiBold.woff2)');
+  await font.load(); document.fonts.add(font);
+  const W = 1024, Hh = 352, cv = document.createElement('canvas');
+  cv.width = W; cv.height = Hh;
+  const c = cv.getContext('2d');
+  const bg = c.createLinearGradient(0, 0, 0, Hh);
+  bg.addColorStop(0, '#dfe0dc'); bg.addColorStop(1, '#d2d3cf');
+  c.fillStyle = bg; c.fillRect(0, 0, W, Hh);
+  const n = text.length, dw = 118, dh = 206, t = 24, gap = 26;
+  const total = n * dw + (n - 1) * gap, x0 = (W - total) / 2 - 36, y0 = 58;
+  c.save();
+  c.transform(1, 0, -0.1, 1, 22, 0); // italic slant like a real LCD
+  for (let i = 0; i < n; i++) {
+    const polys = segPolys(x0 + i * (dw + gap), y0, dw, dh, t);
+    for (const [k, p] of Object.entries(polys)) {
+      c.beginPath(); p.forEach(([px, py], j) => (j ? c.lineTo(px, py) : c.moveTo(px, py))); c.closePath();
+      c.fillStyle = SEGS[text[i]].includes(k) ? '#141414' : 'rgba(0,0,0,0.055)';
+      c.fill();
+    }
+  }
+  c.restore();
+  c.fillStyle = '#141414';
+  c.font = '600 44px InterLCD';
+  c.fillText('kWh', W - 132, Hh - 44);
+  // tiny status marks on top row
+  c.fillStyle = 'rgba(0,0,0,0.55)';
+  for (let i = 0; i < 4; i++) c.fillRect(60 + i * 46, 22, 30, 10);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}
+
+// ---------- models ----------
+const MODELS = {
+  async meter() {
+    const g = new THREE.Group();
+    const body = mesh(new RoundedBoxGeometry(1.2, 1.3, 0.52, 10, 0.1), M.clay); body.position.y = 0.2; g.add(body);
+    const cover = mesh(new RoundedBoxGeometry(1.2, 0.44, 0.48, 10, 0.09), M.clay2); cover.position.set(0, -0.69, -0.01); g.add(cover);
+    const frontZ = 0.26;
+    const bezel = mesh(new RoundedBoxGeometry(0.9, 0.38, 0.05, 6, 0.035), M.ink); bezel.position.set(0, 0.5, frontZ); g.add(bezel);
+    const lcdMat = new THREE.MeshPhysicalMaterial({ map: await lcdTexture('005269'), roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.08 });
+    const lcdW = 0.78, lcdH = 0.268, lcdZ = frontZ + 0.0265;
+    const lcd = new THREE.Mesh(new THREE.PlaneGeometry(lcdW, lcdH), lcdMat); lcd.position.set(0, 0.5, lcdZ); g.add(lcd);
+    const led = mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.024, 32), M.redGlow); led.rotation.x = Math.PI / 2; led.position.set(0.39, 0.19, frontZ); g.add(led);
+    const btn = mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.034, 40), M.ink); btn.rotation.x = Math.PI / 2; btn.position.set(-0.37, 0.19, frontZ); g.add(btn);
+    const lines = [[0.54, 0.0], [0.44, -0.075], [0.5, -0.15], [0.3, -0.225]];
+    for (const [w, y] of lines) { const l = mesh(new THREE.BoxGeometry(w, 0.02, 0.008), M.groove, { cast: false }); l.position.set(-0.27 + w / 2 - 0.02, y, frontZ + 0.001); g.add(l); }
+    const plate = mesh(new RoundedBoxGeometry(0.2, 0.2, 0.012, 3, 0.02), M.groove, { cast: false }); plate.position.set(0.37, -0.11, frontZ); g.add(plate);
+    for (const x of [-0.36, 0.36]) { const s = mesh(new THREE.CylinderGeometry(0.038, 0.038, 0.024, 24), M.metal); s.rotation.x = Math.PI / 2; s.position.set(x, -0.69, 0.235); g.add(s); }
+    const seal = mesh(new THREE.SphereGeometry(0.036, 32, 20), M.red); seal.position.set(0, -0.6, 0.245); g.add(seal);
+    const wire = rod([-0.36, -0.69, 0.25], [0, -0.6, 0.25], 0.006, M.ink); g.add(wire);
+    const hook = mesh(new THREE.TorusGeometry(0.075, 0.02, 14, 40), M.clay2); hook.position.set(0, 0.92, 0); g.add(hook);
+    // corners of the LCD in world space, for the SVG overlay
+    const corners = [[-lcdW / 2, lcdH / 2], [lcdW / 2, lcdH / 2], [lcdW / 2, -lcdH / 2], [-lcdW / 2, -lcdH / 2]]
+      .map(([x, y]) => new THREE.Vector3(x, 0.5 + y, lcdZ));
+    return {
+      group: g, floor: -0.91, cam: { az: 30, el: 11, dist: 4.5, fov: 25, target: [0, 0.03, 0] },
+      update() {}, points: { lcd: corners, led: [new THREE.Vector3(0.39, 0.19, frontZ + 0.013)] },
+    };
+  },
+
+  async gpu() {
+    const g = new THREE.Group(), fans = [];
+    const pcb = mesh(new RoundedBoxGeometry(2.3, 1.0, 0.06, 4, 0.025), M.ink); pcb.position.z = -0.17; g.add(pcb);
+    const shroud = mesh(new RoundedBoxGeometry(2.2, 0.92, 0.26, 10, 0.08), M.clay); g.add(shroud);
+    for (const x of [-0.52, 0.52]) {
+      const well = mesh(new THREE.CylinderGeometry(0.37, 0.37, 0.02, 64), M.inkMatte, { cast: false }); well.rotation.x = Math.PI / 2; well.position.set(x, 0, 0.125); g.add(well);
+      const ring = mesh(new THREE.TorusGeometry(0.385, 0.03, 16, 64), M.clay2); ring.position.set(x, 0, 0.135); g.add(ring);
+      const fan = new THREE.Group(); fan.position.set(x, 0, 0.14);
+      const hub = mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.05, 40), M.red); hub.rotation.x = Math.PI / 2; fan.add(hub);
+      for (let i = 0; i < 7; i++) {
+        const piv = new THREE.Group(); piv.rotation.z = (i * TAU) / 7;
+        const blade = mesh(new RoundedBoxGeometry(0.25, 0.085, 0.014, 2, 0.006), M.clay); blade.position.x = 0.215; blade.rotation.x = 0.55;
+        piv.add(blade); fan.add(piv);
+      }
+      g.add(fan); fans.push(fan);
+    }
+    const stripe = mesh(new THREE.BoxGeometry(1.7, 0.032, 0.012), M.red, { cast: false }); stripe.position.set(0.1, 0.405, 0.131); g.add(stripe);
+    const br = mesh(new THREE.BoxGeometry(0.04, 1.12, 0.36), M.metal); br.position.set(-1.18, 0.03, -0.05); g.add(br);
+    const fingers = mesh(new THREE.BoxGeometry(0.95, 0.12, 0.05), M.metal); fingers.position.set(0.2, -0.55, -0.17); g.add(fingers);
+    g.position.y = 0.05;
+    return {
+      group: g, floor: -0.64, cam: { az: 0, el: 16, dist: 5.9, fov: 29, target: [0, -0.02, 0] },
+      update(t) { g.rotation.y = -0.5 + 0.32 * Math.sin(TAU * t); fans.forEach(f => (f.rotation.z = -(TAU / 7) * 2 * t)); },
+    };
+  },
+
+  async layers() {
+    const g = new THREE.Group(), slabs = [];
+    for (let i = 0; i < 5; i++) {
+      const s = mesh(new RoundedBoxGeometry(1.5, 0.15, 1.5, 8, 0.055), i === 3 ? M.red : M.clay);
+      s.userData.y = i * 0.27; s.position.y = s.userData.y; g.add(s); slabs.push(s);
+    }
+    return {
+      group: g, floor: -0.09, cam: { az: 45, el: 28, dist: 8.0, fov: 25, target: [0, 0.48, 0] },
+      update(t) {
+        slabs.forEach((s, i) => (s.position.y = s.userData.y + 0.045 * Math.sin(TAU * (t - i * 0.14))));
+        g.rotation.y = (Math.PI / 2) * t;
+      },
+    };
+  },
+
+  async router() {
+    const g = new THREE.Group();
+    const hub = mesh(new RoundedBoxGeometry(0.82, 0.82, 0.82, 10, 0.16), M.clay); g.add(hub);
+    const led = mesh(new THREE.SphereGeometry(0.045, 24, 16), M.redGlow); led.position.set(0.24, 0.24, 0.41); g.add(led);
+    const inA = [-1.75, 0, 0], inB = [-0.41, 0, 0];
+    const upA = [0.41, 0.16, 0], upB = [1.75, 0.66, 0];
+    const dnA = [0.41, -0.16, 0], dnB = [1.75, -0.66, 0];
+    g.add(rod(inA, inB, 0.035, M.ink), rod(upA, upB, 0.035, M.ink), rod(dnA, dnB, 0.035, M.red));
+    const cap = (p, mat) => { const c = mesh(new THREE.SphereGeometry(0.075, 24, 16), mat); c.position.set(...p); return c; };
+    g.add(cap(inA, M.ink), cap(upB, M.ink), cap(dnB, M.red));
+    const lerp = (a, b, u) => a.map((v, i) => v + (b[i] - v) * u);
+    const beads = [];
+    const addBeads = (a, b, n, mat, r = 0.085) => {
+      for (let i = 0; i < n; i++) { const s = mesh(new THREE.SphereGeometry(r, 28, 18), mat); g.add(s); beads.push({ s, a, b, n, i }); }
+    };
+    addBeads(inA, inB, 3, M.clay2);
+    addBeads(upA, upB, 2, M.ink);
+    addBeads(dnA, dnB, 1, M.red, 0.095);
+    return {
+      group: g, floor: -1.0, cam: { az: 0, el: 14, dist: 7.9, fov: 30, target: [0, -0.05, 0] },
+      update(t) {
+        g.rotation.y = -0.28 + 0.22 * Math.sin(TAU * t);
+        for (const b of beads) { const u = (b.i + t) / b.n; b.s.position.set(...lerp(b.a, b.b, u % 1)); }
+      },
+    };
+  },
+
+  async patches() {
+    const g = new THREE.Group(), tiles = [];
+    const cols = 8, rows = 3, s = 0.34, gap = 0.07;
+    const reds = new Set(['0,2', '1,3', '1,4', '2,5']);
+    const base = mesh(new RoundedBoxGeometry(cols * (s + gap) + 0.12, 0.06, rows * (s + gap) + 0.12, 4, 0.03), M.ink);
+    base.position.y = -0.06; g.add(base);
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const tile = mesh(new RoundedBoxGeometry(s, 0.12, s, 4, 0.035), reds.has(`${r},${c}`) ? M.red : M.clay);
+      tile.position.set((c - (cols - 1) / 2) * (s + gap), 0.06, (r - (rows - 1) / 2) * (s + gap));
+      tile.userData = { c }; g.add(tile); tiles.push(tile);
+    }
+    return {
+      group: g, floor: -0.09, cam: { az: -22, el: 34, dist: 8.6, fov: 28, target: [0, 0.05, 0] },
+      update(t) {
+        for (const tile of tiles) {
+          const ph = TAU * (t - tile.userData.c / cols);
+          tile.position.y = 0.06 + 0.2 * Math.pow(Math.max(0, Math.sin(ph)), 3);
+        }
+      },
+    };
+  },
+
+  async rings() {
+    const g = new THREE.Group();
+    const core = mesh(new THREE.SphereGeometry(0.42, 64, 40), M.clay); g.add(core);
+    const specs = [
+      { R: 0.78, mat: M.ink, bead: M.red, tilt: [1.2, 0.2, 0.35], k: 1 },
+      { R: 0.97, mat: M.red, bead: M.ink, tilt: [1.45, -0.55, 0], k: -1 },
+      { R: 1.16, mat: M.clay2, bead: M.red, tilt: [1.05, 0.7, -0.4], k: 2 },
+    ];
+    const orbits = specs.map(sp => {
+      const holder = new THREE.Group(); holder.rotation.set(...sp.tilt);
+      const ring = mesh(new THREE.TorusGeometry(sp.R, 0.024, 16, 128), sp.mat); holder.add(ring);
+      const spin = new THREE.Group(); holder.add(spin);
+      const bead = mesh(new THREE.SphereGeometry(0.075, 28, 18), sp.bead); bead.position.x = sp.R; spin.add(bead);
+      g.add(holder); return { spin, k: sp.k };
+    });
+    g.position.y = 0.1;
+    return {
+      group: g, floor: -0.98, cam: { az: 0, el: 10, dist: 6.7, fov: 30, target: [0, 0.05, 0] },
+      update(t) { orbits.forEach(o => (o.spin.rotation.z = TAU * o.k * t)); core.position.y = 0.03 * Math.sin(TAU * t); },
+    };
+  },
+
+  async doc() {
+    const g = new THREE.Group();
+    const paper = mesh(new RoundedBoxGeometry(1.12, 1.46, 0.07, 4, 0.03), M.clay); g.add(paper);
+    const z = 0.036;
+    const head = mesh(new THREE.BoxGeometry(0.5, 0.07, 0.008), M.ink, { cast: false }); head.position.set(-0.2, 0.55, z); g.add(head);
+    [[0.8, 0.38], [0.66, 0.26], [0.74, 0.14], [0.5, 0.02]].forEach(([w, y]) => {
+      const l = mesh(new THREE.BoxGeometry(w, 0.035, 0.006), M.groove, { cast: false }); l.position.set(-0.45 + w / 2, y, z); g.add(l);
+    });
+    [0.18, 0.3, 0.12, 0.24].forEach((h, i) => {
+      const b = mesh(new THREE.BoxGeometry(0.1, h, 0.012), i === 1 ? M.red : M.ink, { cast: false });
+      b.position.set(-0.4 + i * 0.15, -0.45 + h / 2, z); g.add(b);
+    });
+    const lock = new THREE.Group(); lock.position.set(0.42, -0.42, 0.22);
+    const lb = mesh(new RoundedBoxGeometry(0.52, 0.44, 0.22, 8, 0.07), M.ink); lock.add(lb);
+    const shackle = mesh(new THREE.TorusGeometry(0.165, 0.048, 20, 64, Math.PI), M.red); shackle.position.y = 0.22; lock.add(shackle);
+    const legL = rod([-0.165, 0.22, 0], [-0.165, 0.12, 0], 0.048, M.red), legR = rod([0.165, 0.22, 0], [0.165, 0.12, 0], 0.048, M.red);
+    lock.add(legL, legR);
+    const hole = mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.01, 24), M.white, { cast: false }); hole.rotation.x = Math.PI / 2; hole.position.set(0, 0.03, 0.111); lock.add(hole);
+    const slot = mesh(new THREE.BoxGeometry(0.03, 0.09, 0.01), M.white, { cast: false }); slot.position.set(0, -0.03, 0.111); lock.add(slot);
+    g.add(lock);
+    g.position.y = 0.08;
+    return {
+      group: g, floor: -0.68, cam: { az: 0, el: 12, dist: 5.3, fov: 30, target: [0.05, -0.02, 0] },
+      update(t) { g.rotation.y = -0.34 + 0.3 * Math.sin(TAU * t); lock.position.y = -0.42 + 0.04 * Math.sin(TAU * t + 1.2); },
+    };
+  },
+};
+
+window.setup = async ({ name, size }) => {
+  renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(1);
+  renderer.setSize(size, size);
+  renderer.setClearColor(0xffffff, 1);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.NeutralToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.VSMShadowMap;
+  document.body.appendChild(renderer.domElement);
+
+  makeMaterials();
+  scene = new THREE.Scene();
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environmentIntensity = 0.85;
+
+  model = await MODELS[name]();
+  scene.add(model.group);
+
+  key = new THREE.DirectionalLight(0xffffff, 1.5);
+  key.position.set(-3.2, 7.5, 4.5);
+  key.castShadow = true;
+  key.shadow.mapSize.set(2048, 2048);
+  key.shadow.radius = 14;
+  key.shadow.blurSamples = 24;
+  key.shadow.bias = -0.0004;
+  const sc = key.shadow.camera; sc.left = -3.5; sc.right = 3.5; sc.top = 3.5; sc.bottom = -3.5; sc.near = 0.5; sc.far = 20;
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0xffffff, 0.35); fill.position.set(4, 2, 3); scene.add(fill);
+
+  ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.ShadowMaterial({ opacity: 0.13 }));
+  ground.rotation.x = -Math.PI / 2; ground.position.y = model.floor; ground.receiveShadow = true;
+  scene.add(ground);
+
+  const { az, el, dist, fov, target } = model.cam;
+  camera = new THREE.PerspectiveCamera(fov, 1, 0.1, 100);
+  const a = THREE.MathUtils.degToRad(az), e = THREE.MathUtils.degToRad(el);
+  camera.position.set(target[0] + dist * Math.cos(e) * Math.sin(a), target[1] + dist * Math.sin(e), target[2] + dist * Math.cos(e) * Math.cos(a));
+  camera.lookAt(...target);
+  return true;
+};
+
+window.frame = (t) => {
+  model.update(t);
+  renderer.render(scene, camera);
+  return renderer.domElement.toDataURL('image/png');
+};
+
+// Project named model points to pixel coordinates of the current render.
+window.project = () => {
+  const out = {};
+  const size = renderer.getSize(new THREE.Vector2());
+  model.group.updateMatrixWorld(true);
+  for (const [k, pts] of Object.entries(model.points || {})) {
+    out[k] = pts.map(p => {
+      const v = p.clone().applyMatrix4(model.group.matrixWorld).project(camera);
+      return [(v.x + 1) / 2 * size.x, (1 - v.y) / 2 * size.y];
+    });
+  }
+  return out;
+};
+window.__ready = true;
+</script>
+</body>
+</html>
