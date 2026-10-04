@@ -82,26 +82,89 @@ svtrv2 training           80 img/s    305 img/s   fused sdpa + static torch.comp
 
 ## 弐 · research
 
-**[svtrv2](https://github.com/Lourdhu02/svtrv2):** a paper-faithful SVTRv2 (ICCV 2025), checked against the official OpenOCR implementation, plus my extension **ARD**:
+### [svtrv2](https://github.com/Lourdhu02/svtrv2) · SVTRv2, rebuilt and extended
 
-- **Adaptive resizing:** a small learned router replaces MSR's hand-set aspect-ratio buckets. It is trained with a Bradley–Terry preference loss on which canvas the recognizer reads best.
-- **SGM → CTC distillation:** the train-only semantic module teaches the CTC head, using uniform or Viterbi alignment (checked against brute force). The exported model stays byte-identical to the baseline.
-- **Status:** 49 tests pass. Benchmarks are still running, so there are no accuracy claims until they finish.
+SVTRv2 (ICCV 2025) showed that a CTC-only recognizer can beat encoder–decoder models at scene text. I rebuilt it from the paper, checked it against the official OpenOCR code, and extended it with **ARD** (adaptive routing + semantic-guidance distillation). ARD targets two things the paper leaves on the table, and the deployed model stays CTC-only.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/dwg05-ard-dark.svg">
+  <img src="assets/dwg05-ard-light.svg" width="100%" alt="Drawing 05, ARD on SVTRv2. Solid, what ships: crop, a ~40k-parameter router that picks one of four resize buckets, the SVTRv2 backbone with FRM, the CTC head, text. Dashed, training only: the crop is rendered on two canvases and per-character CTC loss decides which reads better, training the router with a Bradley-Terry preference loss; SGM's left and right streams become a soft teacher distilled into the CTC head at aligned timesteps.">
+</picture>
+
+- **A faithful baseline.**
+  - Local/global mixing built from two 3×3 grouped convs, W/4 timesteps, no positional embedding, FRM, and a train-only SGM.
+  - Multi-size resizing (MSR) with bucketed batching, all four variants (t/s/b/xl), and a `--preset paper` recipe.
+- **Problem 1: the resize bucket is picked by a fixed rule.** MSR assigns each crop a canvas from hand-set aspect-ratio edges. That rule can't see which canvas the recognizer actually reads best.
+  - A ~40k-parameter router (a depthwise-separable conv stem on a 32×128 probe, plus an aspect-ratio embedding) picks the bucket instead.
+  - It learns from a **Bradley–Terry preference loss**: every few steps, a few samples are rendered on two candidate canvases, and the one with the lower per-character CTC loss wins.
+  - Overhead is about 1–2% of step time.
+- **Problem 2: SGM is thrown away at inference.**
+  - Its left and right streams become a soft teacher for the CTC head, at timesteps aligned either uniformly or by Viterbi over the blank-extended alphabet. The Viterbi alignment is verified against brute-force path enumeration.
+  - The loss is (1−β)·KL + β·CE with β = 0.2. Distillation changes only the loss, so the exported model is exactly the baseline CTC network.
+- **Data that can be trusted.**
+  - Trains straight from Union14M-L LMDBs: 3.2M usable samples, no image extraction.
+  - Set up to evaluate on 15 sets: the common six, seven Union14M-B subsets, LTB for long text and OST for occluded text.
+  - The 12.9 GB data pack is checked against sha256 manifests. 25 of its 70 files arrived corrupt and were repaired.
+- **Status:**
+  - 49 tests pass, 17 of them for ARD.
+  - Next: lock the paper baseline, then run a seven-way ablation (uniform vs Viterbi, the router alone, full ARD, oracle routing, refit static edges).
+  - No accuracy claims until those runs finish.
 
 ## 参 · side quests
 
-- **[echome](https://github.com/Lourdhu02/echome):** a local-first agent with CoALA-style memory: episodic vectors in Qdrant, consolidated facts and mined procedures, all orchestrated by LangGraph. It also has a CAT/IRT assessment engine (GRM, Fisher-information item selection). It runs fully on-device with Ollama.
-- **[finsentinel.ai](https://github.com/Lourdhu02/fin-sentinal.ai):** private RAG over invoices, receipts and bank statements. It uses ChromaDB with per-user isolation, SentenceTransformers, Ollama, and a local VLM for scans. Nothing leaves the machine.
+### [echome](https://github.com/Lourdhu02/echome) · an agent that remembers
+
+Most agents forget you between sessions. ECHOME is a local-first testbed for **persistent memory**: what happened (episodic), what it learned (semantic) and how you work (procedural). It is measured on whether that memory actually helps.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/dwg06-echome-dark.svg">
+  <img src="assets/dwg06-echome-light.svg" width="100%" alt="Drawing 06, ECHOME's memory loop: a user turn reaches a LangGraph orchestrator that classifies intent with a local LLM, retrieves memory by cosine similarity times recency decay, and dispatches to a tech agent or a sandboxed bash agent. Replies are stored as episodes in Qdrant; episodes are consolidated into semantic facts by an LLM and mined into procedural patterns; a CAT/IRT engine feeds personality traits into semantic memory. An eval harness checks recall across sessions.">
+</picture>
+
+- **Memory in three tiers (CoALA-style).**
+  - Episodes are embedded (MiniLM, with a deterministic hashing fallback) into Qdrant.
+  - Retrieval ranks by cosine similarity × exponential recency decay.
+  - A local LLM consolidates clusters of episodes into semantic facts, with an extractive fallback.
+  - Frequent action sequences are mined into procedures.
+- **Orchestration.**
+  - LangGraph routes every turn: a local LLM classifies intent (with a deterministic fallback), memory is fetched before dispatch, and every turn is written back as a new episode.
+  - The specialists are a tech agent that answers from retrieved memory, and a bash agent that runs only allowlisted commands.
+- **Personality as memory.** A computerized adaptive test supplies stable traits to semantic memory. It uses a graded response model, Fisher-information item selection and MAP θ estimation, over an 80-item calibrated bank covering 8 dimensions.
+- **Evaluated, not vibed.**
+  - 12 scripted multi-session scenarios plant facts and probe them 2–52 turns later.
+  - Each scenario runs as a three-way ablation: full memory, episodic-only, and no memory. The harness reports recall, context-hit rate and retrieval latency against store size.
+  - 72 unit tests.
+- **Rebuilt after a self-audit.** Every part that started as a stub (memory, routing, agents, sandboxing) is now real and tested. The write-up in progress is *a three-tier persistent memory architecture for personalized agents*.
+
+### [finsentinel.ai](https://github.com/Lourdhu02/fin-sentinal.ai) · financial-document RAG that never leaves the machine
+
+Ask questions about invoices, bank statements and payslips without uploading them anywhere.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/dwg07-finsentinel-dark.svg">
+  <img src="assets/dwg07-finsentinel-light.svg" width="100%" alt="Drawing 07, FinSentinelAI. Ingest: upload with JWT into a per-user folder, parse with pdfplumber or Tesseract OCR, embed with all-MiniLM-L6-v2 on CPU, store in ChromaDB tagged by user. Ask: retrieve the top 20 chunks from the user's own documents, rerank to 10 with a cross-encoder, answer with a local Ollama model, return sources and write an audit log. Dashed, built but not yet wired in: document extractor, invoice checks, anomaly scoring and exact SQL answers.">
+</picture>
+
+- **Private by construction.**
+  - FastAPI with JWT auth.
+  - Each user's files land in their own folder, and their chunks carry a session tag that every vector search filters on.
+  - Embeddings run on CPU, answers come from a local Ollama model, and every question goes to an audit log.
+- **Ingest.**
+  - PDFs go through pdfplumber and scans (PNG/JPG/TIFF) through Tesseract OCR, plus CSV, JSON, Markdown and HTML.
+  - Text is chunked, embedded with all-MiniLM-L6-v2 (384-d) and stored in ChromaDB.
+- **Answer.** Top-20 vector search over the user's own documents, reranked to 10 by a cross-encoder (ms-marco-MiniLM-L-6-v2). Ollama then answers with the last six turns of context and returns its sources.
+- **Next, already built and being wired in:**
+  - A rule-based extractor for six document types.
+  - Invoice math checks (subtotal + tax must equal the total within 0.05).
+  - Anomaly scoring with an Isolation Forest plus a z ≥ 3 rule.
+  - Exact SQL answers for totals, counts and vendor spend, so numbers never come from the LLM.
 
 ## 肆 · arsenal
 
-```text
-vision      pytorch · ultralytics yolo (obb) · svtrv2 · mobilevit · opencv · numpy
-inference   tensorrt · triton · onnx runtime · tflite · nginx · flask · gunicorn
-cloud       aws ec2 · lambda · s3 · dynamodb · cloudwatch · docker · helm
-mlops       dvc · uv · github actions · pytest · ruff · pre-commit
-genai       langgraph · ollama · qdrant · chromadb · fastapi · react
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/arsenal-dark.svg">
+  <img src="assets/arsenal-light.svg" width="100%" alt="Arsenal. Languages: Python, C++, SQL, TypeScript, Bash. Vision and ML: PyTorch, YOLO, OpenCV, NumPy, pandas, scikit-learn, TensorFlow. Inference: TensorRT, Triton, ONNX Runtime, TFLite, vLLM, NGINX, Flask, Gunicorn, FastAPI. Cloud and infra: AWS, EC2, Lambda, S3, DynamoDB, CloudWatch, SageMaker, Docker, Kubernetes, Helm, Linux. Data: PostgreSQL, SQLite, Redis, MongoDB. MLOps: DVC, MLflow, Weights and Biases, uv, GitHub Actions, Git, pytest, Ruff, pre-commit, Jupyter, Kaggle. GenAI: LangGraph, LangChain, Ollama, OpenAI, Groq, Hugging Face, SBERT, Qdrant, ChromaDB, React.">
+</picture>
 
 ## 伍 · path
 

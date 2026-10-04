@@ -30,6 +30,7 @@ FONTS = {
     "brush": ("@fontsource/yuji-syuku", "yuji-syuku", 400),
 }
 MONO = NM / "jetbrains-mono/fonts/webfonts/JetBrainsMono-Medium.woff2"
+MONO_BOLD = NM / "jetbrains-mono/fonts/webfonts/JetBrainsMono-Bold.woff2"
 
 
 @lru_cache(None)
@@ -102,6 +103,9 @@ class Fonts:
         rules = []
         for fam, chars in sorted(self.need.items()):
             chars = set(chars) | {" "}
+            if fam == "monob":
+                rules.append(f"@font-face{{font-family:monob;src:url(data:font/woff2;base64,{subset_b64(MONO_BOLD, ''.join(sorted(chars)))})}}")
+                continue
             if fam == "mono":
                 missing = [c for c in chars if ord(c) not in advance_table(MONO)[1]]
                 assert not missing, f"JetBrains Mono lacks {missing}"

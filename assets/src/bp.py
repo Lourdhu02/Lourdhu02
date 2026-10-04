@@ -11,6 +11,7 @@ from xml.sax.saxutils import escape
 from common import MONO_ADV, PALETTES, Fonts, svg_doc
 
 START = 2.8  # seconds: the drawing is finished, the loop begins
+TOTAL_SHEETS = 7
 
 
 # ---------------------------------------------------------------- geometry
@@ -134,12 +135,12 @@ class Drawing:
         self.path([(bx + 150, by), (bx + 150, y1)], 0.45, P["faint"], 0.8)
         self.text(bx + 9, by + 14, "LOURDU RAJU · SUJANIX", 8, P["muted"], ls=0.6, delay=0.5)
         self.text(bx + 9, by + 27, title.lower()[:24], 8, P["muted"], ls=0.3, delay=0.55)
-        self.text(bx + 158, by + 14, f"DWG {no:02d} / 04", 8, P["muted"], ls=0.6, delay=0.5)
+        self.text(bx + 158, by + 14, f"DWG {no:02d} / {TOTAL_SHEETS:02d}", 8, P["muted"], ls=0.6, delay=0.5)
         self.text(bx + 158, by + 27, "REV 2026.10", 8, P["muted"], ls=0.6, delay=0.55)
 
-    def box(self, x, y, w, h, delay, width=1.25, stroke=None):
+    def box(self, x, y, w, h, delay, width=1.25, stroke=None, dashed=None):
         pts_ = [(x, y), (x + w, y), (x + w, y + h), (x, y + h), (x, y)]
-        d, _ = self.path(pts_, delay, stroke, width, speed=900)
+        d, _ = self.path(pts_, delay, stroke, width, speed=900, dashed=dashed)
         # construction ticks: the edges run a little past each corner
         t = 6
         for cx, cy, sx, sy in ((x, y, -1, -1), (x + w, y, 1, -1), (x + w, y + h, 1, 1), (x, y + h, -1, 1)):
@@ -147,8 +148,8 @@ class Drawing:
             self.path([(cx, cy + sy * t), (cx, cy)], delay + 0.3, self.P["faint"], 0.8)
         return d
 
-    def node(self, x, y, w, h, kanji, label, sub, delay, sub_fill=None):
-        d = self.box(x, y, w, h, delay)
+    def node(self, x, y, w, h, kanji, label, sub, delay, sub_fill=None, dashed=None):
+        d = self.box(x, y, w, h, delay, dashed=dashed)
         t = delay + 0.35
         self.text(x + 8, y + 17, kanji, 12.5, self.P["shu"], fam="mincho", delay=t)
         self.text(x + 25, y + 16, label, 11, self.P["ink"], ls=0.9, delay=t)
@@ -557,6 +558,225 @@ def dwg_release(theme):
     return D.render()
 
 
+# ================================================================= 図05 ARD method
+def dwg_ard(theme):
+    D = Drawing(theme, 900, 420, "図05 ARD method",
+                "Blueprint of ARD on SVTRv2. Deployed path, solid: crop, a ~40k-parameter router choosing one of four "
+                "MSR buckets, SVTRv2 backbone with FRM, CTC head, text. Training only, dashed: the crop is rendered on "
+                "two canvases, per-character CTC loss decides which reads better, and a Bradley-Terry preference loss "
+                "trains the router; SGM's left and right streams form a soft teacher distilled into the CTC head at "
+                "aligned timesteps (uniform or Viterbi) with KL plus cross-entropy.")
+    P = D.P
+    D.frame(5, "ARD · SVTRV2 EXTENDED", "solid: what ships (ctc only) · dashed: training only, never exported")
+    cy = 150
+    crop = D.node(40, 124, 92, 52, "写", "CROP", "any aspect", 0.5)
+    router = D.node(164, 124, 118, 52, "分", "ROUTER", "~40k params", 0.65)
+    bins = []
+    for k, nm in enumerate(("short", "medium", "long", "xlong")):
+        y = 104 + k * 24
+        d = D.box(312, y, 66, 18, 0.8 + 0.05 * k, width=1.0)
+        D.text(345, y + 12.5, nm, 8.4, P["ink2"], anchor="middle", delay=1.0)
+        bins.append((d, y))
+    svtr = D.node(410, 124, 140, 52, "骨", "SVTRv2", "mixing · frm", 0.95)
+    head = D.node(582, 124, 104, 52, "頭", "CTC HEAD", "w/4 steps", 1.1)
+    text = D.node(718, 124, 142, 52, "文", "TEXT", '"shinkansen" 0.98', 1.25, sub_fill=P["ink2"])
+    w_cr = D.wire([(132, cy), (164, cy)], 0.7)
+    w_rb = [D.wire([(282, cy), (297, cy), (297, y + 9), (312, y + 9)], 0.85, r=4, width=1.0) for _, y in bins]
+    w_bs = [D.wire([(378, y + 9), (394, y + 9), (394, cy), (410, cy)], 0.9, r=4, width=1.0) for _, y in bins]
+    w_sh = D.wire([(550, cy), (582, cy)], 1.15)
+    w_ht = D.wire([(686, cy), (718, cy)], 1.3)
+    D.dim(164, 860, 92, "ships: router + the unchanged ctc model · no extra decoder", 1.5)
+    # training-only lane
+    dash = "4 3"
+    explore = D.node(40, 262, 120, 48, "試", "EXPLORE", "canvas a vs b", 1.3, dashed=dash)
+    ctcl = D.node(192, 262, 112, 48, "測", "CTC LOSS", "per character", 1.4, dashed=dash)
+    bt = D.node(336, 262, 136, 48, "比", "PREFERENCE", "bradley–terry", 1.5, dashed=dash)
+    sgm = D.node(504, 262, 104, 48, "双", "SGM", "left · right", 1.45, dashed=dash)
+    teach = D.node(640, 262, 108, 48, "師", "TEACHER", "soft q · τ", 1.55, dashed=dash)
+    w_ce = D.wire([(86, 176), (86, 262)], 1.5, dashed=dash, width=1.0)
+    w_el = D.wire([(160, 286), (192, 286)], 1.55, dashed=dash, width=1.0)
+    w_lb = D.wire([(304, 286), (336, 286)], 1.6, dashed=dash, width=1.0)
+    w_br = D.wire([(404, 262), (404, 226), (223, 226), (223, 176)], 1.7, dashed=dash, width=1.0)
+    w_ss = D.wire([(480, 176), (480, 238), (556, 238), (556, 262)], 1.7, dashed=dash, width=1.0)
+    w_st = D.wire([(608, 286), (640, 286)], 1.75, dashed=dash, width=1.0)
+    w_th = D.wire([(694, 262), (694, 226), (634, 226), (634, 176)], 1.8, dashed=dash, width=1.0)
+    D.text(96, 230, "render twice", 8.4, P["muted"], delay=1.9)
+    D.text(232, 220, "lower loss wins → update router", 8.4, P["muted"], delay=1.9)
+    D.text(700, 238, "kl + ce · t(i)", 8.4, P["muted"], delay=1.95)
+    D.text(700, 250, "uniform | viterbi", 8.4, P["muted"], delay=2.0)
+    D.text(40, 340, "K = 4 buckets   ·   β = 0.2   ·   exploration ≈ 1–2% step time   ·   49 tests, 17 for ard", 9, P["ink2"], delay=2.1)
+    D.text(40, 358, "status: implemented and tested; benchmark runs pending, so no accuracy claims yet", 9, P["muted"], delay=2.2)
+
+    T, N = 6.0, 4
+    shu, cyan, pink = P["shu"], P["cyan"], P["pink"]
+    every = lambda a, b: loops(a, b, range(N), N)
+    D.pulse(w_cr, every(0.00, 0.08), N * T, shu)
+    D.flash(router, every(0.08, 0.16), N * T, shu)
+    for k in range(4):  # the router picks a different bucket each photo
+        D.pulse(w_rb[k], loops(0.16, 0.24, (k,), N), N * T, shu, length=12)
+        D.flash(bins[k][0], loops(0.24, 0.34, (k,), N), N * T, shu)
+        D.pulse(w_bs[k], loops(0.32, 0.40, (k,), N), N * T, shu, length=12)
+    D.flash(svtr, every(0.40, 0.50), N * T, shu)
+    D.pulse(w_sh, every(0.50, 0.57), N * T, shu)
+    D.flash(head, every(0.57, 0.65), N * T, shu)
+    D.pulse(w_ht, every(0.65, 0.72), N * T, shu)
+    D.flash(text, every(0.72, 0.90), N * T, shu)
+    pref = (1, 3)
+    D.pulse(w_ce, loops(0.10, 0.20, pref, N), N * T, cyan)
+    D.flash(explore, loops(0.20, 0.28, pref, N), N * T, cyan)
+    D.pulse(w_el, loops(0.28, 0.34, pref, N), N * T, cyan)
+    D.flash(ctcl, loops(0.34, 0.42, pref, N), N * T, cyan)
+    D.pulse(w_lb, loops(0.42, 0.48, pref, N), N * T, cyan)
+    D.flash(bt, loops(0.48, 0.56, pref, N), N * T, cyan)
+    D.pulse(w_br, loops(0.56, 0.70, pref, N), N * T, cyan)
+    D.flash(router, loops(0.70, 0.78, pref, N), N * T, cyan)
+    dist = (0, 2)
+    D.pulse(w_ss, loops(0.50, 0.60, dist, N), N * T, pink)
+    D.flash(sgm, loops(0.60, 0.68, dist, N), N * T, pink)
+    D.pulse(w_st, loops(0.68, 0.74, dist, N), N * T, pink)
+    D.flash(teach, loops(0.74, 0.82, dist, N), N * T, pink)
+    D.pulse(w_th, loops(0.82, 0.93, dist, N), N * T, pink)
+    D.flash(head, loops(0.93, 0.995, dist, N), N * T, pink)
+    return D.render()
+
+
+# ================================================================= 図06 ECHOME memory loop
+def dwg_echome(theme):
+    D = Drawing(theme, 900, 420, "図06 ECHOME memory loop",
+                "Blueprint of ECHOME: a user turn goes to a LangGraph orchestrator that classifies intent with a local "
+                "LLM, retrieves memory by cosine similarity times recency decay, and dispatches to a tech agent or an "
+                "allowlisted bash agent. The reply is stored as an episode in Qdrant; episode clusters are consolidated "
+                "into semantic facts by an LLM and frequent sequences are mined into procedures. A CAT/IRT engine feeds "
+                "personality traits into semantic memory. An eval harness runs 12 multi-session scenarios with "
+                "full, episodic-only and no-memory ablations.")
+    P = D.P
+    D.frame(6, "ECHOME · MEMORY LOOP", "an agent that remembers across sessions, and a harness that checks it actually does")
+    turn = D.node(40, 112, 96, 48, "入", "TURN", "user message", 0.5)
+    orch = D.node(166, 106, 150, 60, "分", "ORCHESTRATOR", "langgraph · llm intent", 0.65)
+    tech = D.node(350, 88, 124, 40, "技", "TECH", "answers from memory", 0.8)
+    bash = D.node(350, 144, 124, 40, "殻", "BASH", "allowlist sandbox", 0.85)
+    reply = D.node(508, 112, 104, 48, "返", "REPLY", "stored as episode", 1.0)
+    ev = D.node(650, 96, 210, 88, "試", "EVAL HARNESS", "recall · context hit · latency", 1.1, dashed="4 3")
+    D.text(658, 132, "12 scenarios · recall 2–52 turns", 8.8, P["ink2"], delay=1.5)
+    D.text(658, 147, "full · episodic-only · no memory", 8.8, P["ink2"], delay=1.55)
+    epi = D.node(166, 240, 150, 52, "記", "EPISODIC", "qdrant · minilm", 1.15)
+    sem = D.node(384, 240, 140, 52, "識", "SEMANTIC", "consolidated facts", 1.25)
+    proc = D.node(592, 240, 140, 52, "型", "PROCEDURAL", "mined patterns", 1.35)
+    cat = D.node(384, 334, 140, 46, "測", "CAT · IRT", "grm · fisher · map", 1.45)
+    w1 = D.wire([(136, 136), (166, 136)], 0.7)
+    w_ot = D.wire([(316, 128), (333, 128), (333, 108), (350, 108)], 0.85, r=5)
+    w_ob = D.wire([(316, 146), (333, 146), (333, 164), (350, 164)], 0.85, r=5)
+    w_tr = D.wire([(474, 108), (491, 108), (491, 128), (508, 128)], 0.95, r=5)
+    w_br = D.wire([(474, 164), (491, 164), (491, 146), (508, 146)], 0.95, r=5)
+    w_ret = D.wire([(241, 240), (241, 166)], 1.25)
+    w_sto = D.wire([(560, 160), (560, 212), (290, 212), (290, 240)], 1.3)
+    w_con = D.wire([(316, 266), (384, 266)], 1.35)
+    w_min = D.wire([(241, 292), (241, 314), (662, 314), (662, 292)], 1.45)
+    w_cat = D.wire([(454, 334), (454, 292)], 1.55)
+    w_ev = D.wire([(650, 136), (612, 136)], 1.5, dashed="4 3", width=1.0)
+    D.text(235, 230, "cos × recency", 8.4, P["muted"], anchor="end", delay=1.8)
+    D.text(566, 190, "store", 8.4, P["muted"], delay=1.8)
+    D.text(350, 259, "llm", 8.4, P["muted"], anchor="middle", delay=1.85)
+    D.text(560, 308, "frequent sequences", 8.4, P["muted"], anchor="middle", delay=1.9)
+    D.text(460, 326, "traits", 8.4, P["muted"], delay=1.95)
+    D.text(40, 356, "cat: 80-item calibrated bank · 8 dimensions · stops at se < 0.32", 8.6, P["muted"], delay=2.0)
+    D.text(40, 371, "72 unit tests · runs fully on-device with ollama", 8.6, P["muted"], delay=2.05)
+
+    T, N = 7.0, 2
+    shu, cyan, pink = P["shu"], P["cyan"], P["pink"]
+    every = lambda a, b: loops(a, b, range(N), N)
+    D.pulse(w1, every(0.00, 0.07), N * T, shu)
+    D.flash(orch, every(0.07, 0.17), N * T, shu)
+    D.flash(epi, every(0.05, 0.12), N * T, shu, width=1.4)
+    D.pulse(w_ret, every(0.07, 0.15), N * T, shu)
+    D.pulse(w_ot, loops(0.17, 0.24, (0,), N), N * T, shu)
+    D.flash(tech, loops(0.24, 0.32, (0,), N), N * T, shu)
+    D.pulse(w_tr, loops(0.32, 0.39, (0,), N), N * T, shu)
+    D.pulse(w_ob, loops(0.17, 0.24, (1,), N), N * T, shu)
+    D.flash(bash, loops(0.24, 0.32, (1,), N), N * T, shu)
+    D.pulse(w_br, loops(0.32, 0.39, (1,), N), N * T, shu)
+    D.flash(reply, every(0.39, 0.47), N * T, shu)
+    D.pulse(w_sto, every(0.47, 0.60), N * T, shu)
+    D.flash(epi, every(0.60, 0.68), N * T, shu)
+    D.pulse(w_con, loops(0.68, 0.76, (0,), N), N * T, shu)
+    D.flash(sem, loops(0.76, 0.86, (0,), N), N * T, shu)
+    D.pulse(w_min, loops(0.68, 0.82, (1,), N), N * T, shu)
+    D.flash(proc, loops(0.82, 0.92, (1,), N), N * T, shu)
+    D.pulse(w_cat, [(0.30, 0.36)], 3 * T, pink)
+    D.flash(sem, [(0.36, 0.42)], 3 * T, pink)
+    D.pulse(w_ev, every(0.86, 0.93), N * T, cyan, length=12)
+    D.flash(ev, every(0.90, 0.99), N * T, cyan, width=1.5)
+    return D.render()
+
+
+# ================================================================= 図07 FinSentinel RAG
+def dwg_finsentinel(theme):
+    D = Drawing(theme, 900, 420, "図07 FinSentinelAI RAG",
+                "Blueprint of FinSentinelAI. Ingest: upload with JWT into a per-user folder, parse with pdfplumber or "
+                "Tesseract OCR, embed with all-MiniLM-L6-v2 on CPU, store in ChromaDB tagged with the user's session. "
+                "Ask: retrieve the top 20 chunks from the user's own documents, rerank to 10 with a cross-encoder, "
+                "answer with a local Ollama model and the last six turns, return sources, and write an audit log. "
+                "Built but not yet wired in, dashed: a six-type document extractor, invoice total checks, anomaly "
+                "scoring and exact SQL answers.")
+    P = D.P
+    D.frame(7, "FINSENTINELAI · PRIVATE RAG", "documents never leave the machine · dashed: built, next to wire in")
+    up = D.node(40, 98, 112, 52, "入", "UPLOAD", "jwt · own folder", 0.5)
+    parse = D.node(184, 98, 124, 52, "読", "PARSE", "pdfplumber · ocr", 0.6)
+    emb = D.node(340, 98, 124, 52, "埋", "EMBED", "minilm-l6 · cpu", 0.7)
+    chroma = D.node(496, 98, 124, 52, "蔵", "CHROMADB", "tagged by user", 0.8)
+    ask = D.node(40, 272, 112, 52, "問", "ASK", "jwt · user id", 0.9)
+    ret = D.node(184, 272, 124, 52, "索", "RETRIEVE", "top-20 · own docs", 1.0)
+    rr = D.node(340, 272, 124, 52, "順", "RERANK", "cross-encoder → 10", 1.1)
+    llm = D.node(496, 272, 124, 52, "答", "OLLAMA", "+ last 6 turns", 1.2)
+    ans = D.node(652, 272, 100, 52, "返", "ANSWER", "+ sources", 1.3)
+    aud = D.node(784, 272, 76, 52, "記", "AUDIT", "every q", 1.4)
+    dash = "4 3"
+    D.text(652, 90, "built · next to wire in", 8.6, P["muted"], delay=1.5)
+    ext = D.node(652, 98, 100, 40, "抽", "EXTRACT", "6 doc kinds", 1.5, dashed=dash)
+    ver = D.node(768, 98, 92, 40, "検", "VERIFY", "sum ± .05", 1.55, dashed=dash)
+    ano = D.node(652, 150, 100, 40, "異", "ANOMALY", "iforest · z≥3", 1.6, dashed=dash)
+    exa = D.node(768, 150, 92, 40, "数", "EXACT", "sql totals", 1.65, dashed=dash)
+    w_up = D.wire([(152, 124), (184, 124)], 0.6)
+    w_pe = D.wire([(308, 124), (340, 124)], 0.7)
+    w_ec = D.wire([(464, 124), (496, 124)], 0.8)
+    w_ar = D.wire([(152, 298), (184, 298)], 0.95)
+    w_rr = D.wire([(308, 298), (340, 298)], 1.05)
+    w_rl = D.wire([(464, 298), (496, 298)], 1.15)
+    w_la = D.wire([(620, 298), (652, 298)], 1.25)
+    w_au = D.wire([(752, 298), (784, 298)], 1.35)
+    w_cr = D.wire([(558, 150), (558, 214), (246, 214), (246, 272)], 1.2)
+    w_nx = D.wire([(756, 190), (756, 236), (702, 236), (702, 272)], 1.7, dashed=dash, width=1.0)
+    D.text(266, 207, "vector search, filtered to the user's own chunks", 8.4, P["muted"], delay=1.9)
+    D.text(762, 230, "flags · exact numbers", 8.4, P["muted"], delay=1.95)
+    D.text(40, 352, "pdf · png/jpg (tesseract) · csv · json · md · html   →   chunks   →   384-d embeddings", 9, P["ink2"], delay=2.0)
+    D.text(40, 370, "invoices · bank statements · salary slips · gst returns · credit/debit notes · purchase orders", 9, P["muted"], delay=2.1)
+
+    T, N = 6.5, 3
+    shu, cyan, pink = P["shu"], P["cyan"], P["pink"]
+    every = lambda a, b: loops(a, b, range(N), N)
+    D.flash(up, every(0.00, 0.06), N * T, shu)
+    D.pulse(w_up, every(0.05, 0.12), N * T, shu)
+    D.flash(parse, every(0.12, 0.20), N * T, shu)
+    D.pulse(w_pe, every(0.20, 0.27), N * T, shu)
+    D.flash(emb, every(0.27, 0.35), N * T, shu)
+    D.pulse(w_ec, every(0.35, 0.42), N * T, shu)
+    D.flash(chroma, every(0.42, 0.50), N * T, shu)
+    D.flash(ask, every(0.40, 0.46), N * T, cyan)
+    D.pulse(w_ar, every(0.45, 0.52), N * T, cyan)
+    D.flash(ret, every(0.52, 0.62), N * T, cyan)
+    D.pulse(w_cr, every(0.50, 0.62), N * T, cyan)
+    D.pulse(w_rr, every(0.62, 0.68), N * T, cyan)
+    D.flash(rr, every(0.68, 0.75), N * T, cyan)
+    D.pulse(w_rl, every(0.75, 0.81), N * T, cyan)
+    D.flash(llm, every(0.81, 0.88), N * T, cyan)
+    D.pulse(w_la, every(0.88, 0.93), N * T, cyan)
+    D.flash(ans, every(0.93, 0.995), N * T, cyan)
+    D.pulse(w_au, loops(0.93, 0.99, range(N), N), N * T, P["ink2"], length=10, width=1.6)
+    D.spark(756, 190, loops(0.55, 0.58, (2,), N), N * T, pink, r=8)
+    D.flash(ext, loops(0.56, 0.66, (2,), N), N * T, pink, width=1.4)
+    return D.render()
+
+
 # ================================================================= whoami terminal
 WHOAMI = """{
   "whoami": "Lourdu Raju",
@@ -680,4 +900,7 @@ DRAWINGS = {
     "dwg02-serving": dwg_serving,
     "dwg03-gauges": dwg_gauges,
     "dwg04-release": dwg_release,
+    "dwg05-ard": dwg_ard,
+    "dwg06-echome": dwg_echome,
+    "dwg07-finsentinel": dwg_finsentinel,
 }
