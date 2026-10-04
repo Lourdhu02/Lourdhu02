@@ -1,151 +1,25 @@
-"""Build the README's two images, each in a light and a dark variant.
+"""Build the README's images, each in a light and a dark variant.
 
 hero      ink ensō that draws itself, 侍 in brush, an LR hanko seal, a name that
           glitches now and then, and a terminal line that types and deletes.
 katana    a section divider: tsuka, tsuba, red habaki, a curved blade with a glint.
+whoami    a terminal that types `cat whoami.json` (see bp.py).
+dwg01-04  blueprint drawings of the work: pipeline, serving, gauges, release flow (see bp.py).
 
 2D only: inline SVG with subset fonts embedded, CSS/SMIL animation, transparent
 background so it sits on GitHub's page in either theme. Nothing is fetched at view time.
 
     npm install && pip install -r requirements.txt && python3 build.py   # writes ../*.svg
 """
-import base64
-import io
 import math
 import random
 import sys
-from collections import defaultdict
-from functools import lru_cache
 from pathlib import Path
 from xml.sax.saxutils import escape
 
-from fontTools import subset as ftsubset
-from fontTools.ttLib import TTFont
+from common import MONO_ADV, PALETTES, Fonts, mincho_width, pts, svg_doc
 
-HERE = Path(__file__).resolve().parent
-NM = HERE / "node_modules"
-OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else HERE.parent
-
-PALETTES = {
-    "light": dict(ink="#141414", ink2="#3B3B3B", muted="#8A8A8A", shu="#E3412B", seal_text="#FFFFFF",
-                  blade="#1C1C1C", hamon="#B5B5B5", glint="#FFFFFF", glitch_a="#00B8F0", glitch_b="#FF2E88"),
-    "dark": dict(ink="#EDE6DA", ink2="#C9C1B4", muted="#8B949E", shu="#FF5A45", seal_text="#FFFFFF",
-                 blade="#E6DFD2", hamon="#6E7681", glint="#FFFFFF", glitch_a="#22D3EE", glitch_b="#FF4FA3"),
-}
-
-# ---------------------------------------------------------------- fonts
-FONTS = {
-    "mincho": ("@fontsource/shippori-mincho-b1", "shippori-mincho-b1", 800),
-    "brush": ("@fontsource/yuji-syuku", "yuji-syuku", 400),
-}
-MONO = NM / "jetbrains-mono/fonts/webfonts/JetBrainsMono-Medium.woff2"
-
-
-@lru_cache(None)
-def chunk_cmaps(key):
-    """fontsource ships CJK fonts as many unicode-range chunks; map each chunk to its cmap."""
-    pkg, prefix, wt = FONTS[key]
-    files = sorted((NM / pkg / "files").glob(f"{prefix}-*-{wt}-normal.woff2"))
-    return [(f, set(TTFont(str(f)).getBestCmap())) for f in files]
-
-
-def font_files_for(key, chars):
-    """Group chars by the chunk file that contains them (prefer the 'latin' chunk for ASCII)."""
-    groups = defaultdict(set)
-    chunks = chunk_cmaps(key)
-    latin = [c for c in chunks if "-latin-" in c[0].name]
-    for ch in chars:
-        cp = ord(ch)
-        pool = latin + chunks if cp < 0x250 else chunks
-        for f, cmap in pool:
-            if cp in cmap:
-                groups[f].add(ch)
-                break
-    return groups
-
-
-@lru_cache(None)
-def subset_b64(path, chars):
-    opts = ftsubset.Options()
-    opts.flavor = "woff2"
-    opts.hinting = False
-    opts.desubroutinize = True
-    opts.layout_features = ["kern", "liga"]
-    font = ftsubset.load_font(str(path), opts)
-    sub = ftsubset.Subsetter(options=opts)
-    sub.populate(text=chars)
-    sub.subset(font)
-    buf = io.BytesIO()
-    ftsubset.save_font(font, buf, opts)
-    return base64.b64encode(buf.getvalue()).decode()
-
-
-@lru_cache(None)
-def advance_table(path):
-    f = TTFont(str(path))
-    cmap = f.getBestCmap()
-    adv = {g: a for g, (a, _) in f["hmtx"].metrics.items()}
-    return f["head"].unitsPerEm, cmap, adv
-
-
-def text_width(path, s, size, ls=0.0):
-    upm, cmap, adv = advance_table(path)
-    return sum(adv.get(cmap.get(ord(c)), upm // 2) for c in s) * size / upm + ls * len(s)
-
-
-def unicode_range(chars):
-    return ",".join(f"U+{ord(c):04X}" for c in sorted(chars))
-
-
-class Fonts:
-    """Collects the characters each family needs and emits subset @font-face rules."""
-
-    def __init__(self):
-        self.need = defaultdict(set)
-
-    def use(self, fam, s):
-        self.need[fam].update(s)
-        return fam
-
-    def css(self):
-        rules = []
-        for fam, chars in sorted(self.need.items()):
-            chars = set(chars) | {" "}
-            if fam == "mono":
-                rules.append(f"@font-face{{font-family:mono;src:url(data:font/woff2;base64,{subset_b64(MONO, ''.join(sorted(chars)))})}}")
-                continue
-            for path, cs in sorted(font_files_for(fam, chars).items()):
-                cs = "".join(sorted(cs))
-                rules.append(
-                    f"@font-face{{font-family:{fam};unicode-range:{unicode_range(cs)};"
-                    f"src:url(data:font/woff2;base64,{subset_b64(path, cs)})}}"
-                )
-        return "".join(rules)
-
-
-def mincho_width(s, size, ls=0.0):
-    widths = 0.0
-    for ch in s:
-        groups = font_files_for("mincho", ch)
-        path = next(iter(groups))
-        widths += text_width(path, ch, size)
-    return widths + ls * len(s)
-
-
-MONO_ADV = 0.6  # JetBrains Mono: every glyph advances 600/1000 em
-
-
-def svg_doc(w, h, title, desc, style, body, defs=""):
-    return (
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}" role="img" '
-        f'aria-labelledby="t d"><title id="t">{escape(title)}</title><desc id="d">{escape(desc)}</desc>'
-        f"<style>{style}@media (prefers-reduced-motion:reduce){{*{{animation:none!important}}}}</style>"
-        f"<defs>{defs}</defs>{body}</svg>"
-    )
-
-
-def pts(points):
-    return " ".join(f"{x:.1f},{y:.1f}" for x, y in points)
+OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent
 
 
 # ---------------------------------------------------------------- ensō
@@ -412,9 +286,10 @@ def katana(theme):
 
 
 def main():
+    from bp import DRAWINGS
     OUT.mkdir(parents=True, exist_ok=True)
     for theme in ("light", "dark"):
-        for name, fn in (("hero", hero), ("katana", katana)):
+        for name, fn in (("hero", hero), ("katana", katana), *DRAWINGS.items()):
             data = fn(theme)
             path = OUT / f"{name}-{theme}.svg"
             path.write_text(data)
