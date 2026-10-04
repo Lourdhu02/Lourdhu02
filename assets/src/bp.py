@@ -1,17 +1,18 @@
-"""Blueprint drawings for the work section (図01–図04) and the animated whoami terminal.
+"""Line drawings for the work (FIG 01-06) and the animated whoami terminal.
 
 Every drawing sketches itself in over a faint dot grid: strokes draw on, labels fade
-in, dimension lines appear. Then the loop starts: vermilion pulses run along the wires
-and nodes flash as data passes. Now and then a cyan or pink spark shows up, Jinx-style.
+in, dimension lines appear. Then the loop starts: red pulses run along the wires and
+nodes flash as data passes. Now and then a cyan or pink spark shows up, Jinx-style.
+Panels and nodes have cut corners, labels are set in the display face (see common.py).
 """
 import math
 import re
 from xml.sax.saxutils import escape
 
-from common import MONO_ADV, PALETTES, Fonts, svg_doc
+from common import MONO_ADV, PALETTES, Fonts, chamfer, svg_doc, text_width
 
 START = 2.8  # seconds: the drawing is finished, the loop begins
-TOTAL_SHEETS = 7
+TOTAL_SHEETS = 6
 
 
 # ---------------------------------------------------------------- geometry
@@ -43,12 +44,6 @@ def pathd(points):
     return "M" + " L".join(f"{x:.1f} {y:.1f}" for x, y in points)
 
 
-def arc_points(cx, cy, r, a0, a1, n=64):
-    """Points on a circle, angles in degrees (math convention: CCW from +x, y up)."""
-    return [(cx + r * math.cos(math.radians(a0 + (a1 - a0) * k / n)),
-             cy - r * math.sin(math.radians(a0 + (a1 - a0) * k / n))) for k in range(n + 1)]
-
-
 def pct(x):
     return f"{max(0.0, min(100.0, x * 100)):.3f}%"
 
@@ -65,7 +60,6 @@ class Drawing:
             "@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}"
             "@keyframes fade{from{opacity:0}to{opacity:1}}"
             ".dr{stroke-dasharray:1 1;stroke-dashoffset:0}"
-            ".mono{font-family:mono}.mincho{font-family:mincho}"
         )
 
     def uid(self, p="e"):
@@ -116,44 +110,45 @@ class Drawing:
             f'<pattern id="{gid}" width="{step}" height="{step}" patternUnits="userSpaceOnUse" x="{x}" y="{y}">'
             f'<circle cx="1" cy="1" r=".8" fill="{self.P["grid"]}"/></pattern>'
         )
-        self.add(f'<g opacity=".14"><rect x="{x}" y="{y}" width="{w}" height="{h}" fill="url(#{gid})" class="{self.c_fade(0, .9)}"/></g>')
+        self.add(f'<g opacity=".11"><rect x="{x}" y="{y}" width="{w}" height="{h}" fill="url(#{gid})" class="{self.c_fade(0, .9)}"/></g>')
 
     def frame(self, no, title, subtitle):
-        P, m = self.P, 14
+        """Panel outline with two cut corners, a red FIG tag, the title and a title block."""
+        P, m, cut = self.P, 14, 22
         x0, y0, x1, y1 = m, m, self.w - m, self.h - m
         self.grid(x0 + 6, y0 + 6, x1 - x0 - 12, y1 - y0 - 12)
-        self.path([(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)], 0.05, P["faint"], 0.8, speed=2600)
-        for cx, cy, sx, sy in ((x0, y0, 1, 1), (x1, y0, -1, 1), (x1, y1, -1, -1), (x0, y1, 1, -1)):
-            self.path([(cx, cy + sy * 16), (cx, cy), (cx + sx * 16, cy)], 0.0, P["ink2"], 1.5, speed=160)
-        self.text(34, 47, "図", 16, P["shu"], fam="mincho", delay=0.15)
-        self.text(54, 46, f"{no:02d}", 12, P["shu"], delay=0.15, ls=0.5)
-        self.text(82, 46, title, 11.5, P["ink"], ls=1.6, delay=0.25)
-        self.text(34, 64, subtitle, 10, P["muted"], delay=0.4)
+        self.path(chamfer(x0, y0, x1 - x0, y1 - y0, tr=cut, bl=cut), 0.05, P["faint"], 1.0, speed=2600)
+        self.path([(x0, y0), (x0 + 44, y0)], 0.0, P["red"], 2.6, speed=200)
+        self.path([(x1, y1), (x1 - 44, y1)], 0.0, P["red"], 2.6, speed=200)
+        tag = f"FIG {no:02d}"
+        tw = text_width("d8", tag, 13, 1.2) + 22
+        self.add(f'<path d="M{34 + 7} 31 H{34 + tw:.1f} L{34 + tw - 7:.1f} 51 H34 Z" fill="{P["red"]}" class="{self.c_fade(0.1)}"/>')
+        self.text(34 + 12, 46, tag, 13, P["on_red"], fam="d8", ls=1.2, delay=0.1)
+        self.text(34 + tw + 12, 48.5, title, 21, P["ink"], fam="d8", ls=1.0, delay=0.2)
+        self.text(34, 70, subtitle, 10, P["muted"], delay=0.4)
         bw, bh = 236, 34
         bx, by = x1 - bw, y1 - bh
         self.path([(bx, y1), (bx, by), (x1, by)], 0.3, P["faint"], 0.8, speed=900)
         self.path([(bx + 150, by), (bx + 150, y1)], 0.45, P["faint"], 0.8)
         self.text(bx + 9, by + 14, "LOURDU RAJU · SUJANIX", 8, P["muted"], ls=0.6, delay=0.5)
         self.text(bx + 9, by + 27, title.lower()[:24], 8, P["muted"], ls=0.3, delay=0.55)
-        self.text(bx + 158, by + 14, f"DWG {no:02d} / {TOTAL_SHEETS:02d}", 8, P["muted"], ls=0.6, delay=0.5)
+        self.text(bx + 158, by + 14, f"FIG {no:02d} / {TOTAL_SHEETS:02d}", 8, P["muted"], ls=0.6, delay=0.5)
         self.text(bx + 158, by + 27, "REV 2026.10", 8, P["muted"], ls=0.6, delay=0.55)
 
-    def box(self, x, y, w, h, delay, width=1.25, stroke=None, dashed=None):
-        pts_ = [(x, y), (x + w, y), (x + w, y + h), (x, y + h), (x, y)]
-        d, _ = self.path(pts_, delay, stroke, width, speed=900, dashed=dashed)
-        # construction ticks: the edges run a little past each corner
-        t = 6
-        for cx, cy, sx, sy in ((x, y, -1, -1), (x + w, y, 1, -1), (x + w, y + h, 1, 1), (x, y + h, -1, 1)):
-            self.path([(cx + sx * t, cy), (cx, cy)], delay + 0.3, self.P["faint"], 0.8)
-            self.path([(cx, cy + sy * t), (cx, cy)], delay + 0.3, self.P["faint"], 0.8)
+    def box(self, x, y, w, h, delay, width=1.25, stroke=None, dashed=None, cut=0.0):
+        d, _ = self.path(chamfer(x, y, w, h, tr=cut), delay, stroke, width, speed=900, dashed=dashed)
         return d
 
-    def node(self, x, y, w, h, kanji, label, sub, delay, sub_fill=None, dashed=None):
-        d = self.box(x, y, w, h, delay, dashed=dashed)
+    def node(self, x, y, w, h, label, sub, delay, sub_fill=None, dashed=None):
+        """A stage: cut top-right corner, a red tick on the top edge, label in display caps, detail in mono."""
+        d = self.box(x, y, w, h, delay, dashed=dashed, cut=8)
+        self.path([(x, y), (x + 14, y)], delay + 0.3, self.P["red"], 2.4, speed=200)
         t = delay + 0.35
-        self.text(x + 8, y + 17, kanji, 12.5, self.P["shu"], fam="mincho", delay=t)
-        self.text(x + 25, y + 16, label, 11, self.P["ink"], ls=0.9, delay=t)
-        self.text(x + 8, y + h - 10, sub, 9.3, sub_fill or self.P["muted"], delay=t + 0.1)
+        assert text_width("d8", label, 15.5, 0.7) < w - 16, label
+        assert text_width("mono", sub, 9.3) < w - 16, sub
+        short = h <= 40
+        self.text(x + 10, y + (18 if short else 20), label, 15.5, self.P["ink"], fam="d8", ls=0.7, delay=t)
+        self.text(x + 10, y + h - (7 if short else 10), sub, 9.3, sub_fill or self.P["muted"], delay=t + 0.1)
         return d
 
     def dim(self, x1, x2, y, label, delay, below=False):
@@ -230,9 +225,9 @@ def loops(a, b, ks, n):
     return [((k + a) / n, (k + b) / n) for k in ks]
 
 
-# ================================================================= 図01 inference pipeline
+# ================================================================= FIG 01 inference pipeline
 def dwg_pipeline(theme):
-    D = Drawing(theme, 900, 404, "図01 inference pipeline",
+    D = Drawing(theme, 900, 404, "FIG 01 · inference pipeline",
                 "Blueprint of the meter-reading OCR pipeline: photo, meter presence (MobileViTv2, 3x256x256), dial "
                 "detection (YOLO26n-OBB, 3x352x352), digital or analog (MobileViTv2), OCR (SVTRv2 + CTC), reading. All "
                 "models run as TensorRT FP16 engines on Triton on an NVIDIA L4. Pulses show a photo moving through it.")
@@ -240,13 +235,13 @@ def dwg_pipeline(theme):
     D.frame(1, "INFERENCE PIPELINE", "one photo in, one reading out · every stage is a tensorrt fp16 engine on triton")
     T, N = 6.0, 3  # one photo per T; loops 0-1 read digital, loop 2 reads analog
     cy = 158
-    photo = D.node(40, 132, 92, 52, "写", "PHOTO", "jpeg · url", 0.5)
-    meter = D.node(164, 132, 106, 52, "判", "METER?", "mobilevitv2", 0.65)
-    dials = D.node(302, 132, 106, 52, "検", "DIALS", "yolo26n-obb", 0.8)
-    typ = D.node(440, 132, 100, 52, "類", "TYPE", "mobilevitv2", 0.95)
-    digi = D.node(580, 96, 122, 46, "読", "DIGITAL", "svtrv2 + ctc", 1.1)
-    anlg = D.node(580, 174, 122, 46, "読", "ANALOG", "svtrv2 + ctc", 1.15)
-    read = D.node(744, 132, 116, 52, "値", "READING", '"005269" · 0.97', 1.3, sub_fill=P["ink2"])
+    photo = D.node(40, 132, 92, 52, "PHOTO", "jpeg · url", 0.5)
+    meter = D.node(164, 132, 106, 52, "METER?", "mobilevitv2", 0.65)
+    dials = D.node(302, 132, 106, 52, "DIALS", "yolo26n-obb", 0.8)
+    typ = D.node(440, 132, 100, 52, "TYPE", "mobilevitv2", 0.95)
+    digi = D.node(580, 96, 122, 46, "DIGITAL", "svtrv2 + ctc", 1.1)
+    anlg = D.node(580, 174, 122, 46, "ANALOG", "svtrv2 + ctc", 1.15)
+    read = D.node(744, 132, 116, 52, "READING", '"005269" · 0.97', 1.3, sub_fill=P["ink2"])
     w1 = D.wire([(132, cy), (164, cy)], 0.75)
     w2 = D.wire([(270, cy), (302, cy)], 0.9)
     w3 = D.wire([(408, cy), (440, cy)], 1.05)
@@ -280,60 +275,59 @@ def dwg_pipeline(theme):
         drops[key] = D.wire([(x, 212), (x, 262)], 1.95, width=0.9, stroke=P["faint"])
 
     # ---- the loop: one photo per T; analog only on the third photo
-    shu, cyan, pink = P["shu"], P["cyan"], P["pink"]
+    red, cyan, pink = P["red"], P["cyan"], P["pink"]
     every = lambda a, b: loops(a, b, range(N), N)
-    D.pulse(w1, every(0.00, 0.08), N * T, shu)
-    D.flash(meter, every(0.08, 0.17), N * T, shu)
-    D.pulse(drops["meter"], every(0.08, 0.12), N * T, shu, length=12, width=1.6)
-    D.blink_rect(*engines["presence"], every(0.12, 0.18), N * T, shu)
-    D.pulse(w2, every(0.17, 0.25), N * T, shu)
-    D.flash(dials, every(0.25, 0.34), N * T, shu)
-    D.pulse(drops["dials"], every(0.25, 0.29), N * T, shu, length=12, width=1.6)
-    D.blink_rect(*engines["obb"], every(0.29, 0.35), N * T, shu)
-    D.pulse(w3, every(0.34, 0.42), N * T, shu)
-    D.flash(typ, every(0.42, 0.51), N * T, shu)
-    D.pulse(drops["type"], every(0.42, 0.46), N * T, shu, length=12, width=1.6)
-    D.blink_rect(*engines["cls"], every(0.46, 0.52), N * T, shu)
+    D.pulse(w1, every(0.00, 0.08), N * T, red)
+    D.flash(meter, every(0.08, 0.17), N * T, red)
+    D.pulse(drops["meter"], every(0.08, 0.12), N * T, red, length=12, width=1.6)
+    D.blink_rect(*engines["presence"], every(0.12, 0.18), N * T, red)
+    D.pulse(w2, every(0.17, 0.25), N * T, red)
+    D.flash(dials, every(0.25, 0.34), N * T, red)
+    D.pulse(drops["dials"], every(0.25, 0.29), N * T, red, length=12, width=1.6)
+    D.blink_rect(*engines["obb"], every(0.29, 0.35), N * T, red)
+    D.pulse(w3, every(0.34, 0.42), N * T, red)
+    D.flash(typ, every(0.42, 0.51), N * T, red)
+    D.pulse(drops["type"], every(0.42, 0.46), N * T, red, length=12, width=1.6)
+    D.blink_rect(*engines["cls"], every(0.46, 0.52), N * T, red)
     # digital on photos 0 and 1 (different width buckets), analog on photo 2 in cyan
-    D.pulse(w4d, loops(0.51, 0.59, (0, 1), N), N * T, shu)
-    D.flash(digi, loops(0.59, 0.68, (0, 1), N), N * T, shu)
-    D.blink_rect(*engines["svtrv2-m"], loops(0.60, 0.67, (0,), N), N * T, shu)
-    D.blink_rect(*engines["svtrv2-l"], loops(0.60, 0.67, (1,), N), N * T, shu)
-    D.pulse(w5d, loops(0.68, 0.76, (0, 1), N), N * T, shu)
+    D.pulse(w4d, loops(0.51, 0.59, (0, 1), N), N * T, red)
+    D.flash(digi, loops(0.59, 0.68, (0, 1), N), N * T, red)
+    D.blink_rect(*engines["svtrv2-m"], loops(0.60, 0.67, (0,), N), N * T, red)
+    D.blink_rect(*engines["svtrv2-l"], loops(0.60, 0.67, (1,), N), N * T, red)
+    D.pulse(w5d, loops(0.68, 0.76, (0, 1), N), N * T, red)
     D.pulse(w4a, loops(0.51, 0.59, (2,), N), N * T, cyan)
     D.flash(anlg, loops(0.59, 0.68, (2,), N), N * T, cyan)
     D.blink_rect(*engines["analog-s"], loops(0.60, 0.67, (2,), N), N * T, cyan)
     D.pulse(w5a, loops(0.68, 0.76, (2,), N), N * T, cyan)
-    D.flash(read, loops(0.76, 0.95, (0, 1), N), N * T, shu)
+    D.flash(read, loops(0.76, 0.95, (0, 1), N), N * T, red)
     D.flash(read, loops(0.76, 0.95, (2,), N), N * T, cyan)
     D.spark(560, cy, loops(0.505, 0.53, (2,), N), N * T, cyan)
     D.spark(838, 268, [(0.62, 0.64)], 11.0, pink)
     return D.render()
 
 
-# ================================================================= 図02 serving topology
+# ================================================================= FIG 02 serving topology
 def dwg_serving(theme):
-    D = Drawing(theme, 900, 392, "図02 serving topology",
+    D = Drawing(theme, 900, 392, "FIG 02 · serving topology",
                 "Blueprint of production serving: the backend calls a router that sends a canary slice to the GPU path "
                 "(nginx, gunicorn gateway, Triton on an L4; p50 156 ms) and the rest to a container Lambda (p50 1,415 ms). "
                 "Any error or 3 s timeout on the GPU path falls back to serverless. Every GPU request is spooled to S3 "
                 "and DynamoDB with retries.")
     P = D.P
     D.frame(2, "SERVING TOPOLOGY", "a canary slice rides the gpu path · everything else, and every failure, lands on serverless")
-    backend = D.node(40, 172, 112, 52, "入", "BACKEND", "330,707 req/day", 0.5)
+    backend = D.node(40, 172, 112, 52, "BACKEND", "330,707 req/day", 0.5)
     # router as a diamond
     rc = (214, 198)
     diamond = [(214, 164), (248, 198), (214, 232), (180, 198), (214, 164)]
     D.path(diamond, 0.65, width=1.25)
-    D.text(214, 196, "分", 12.5, P["shu"], fam="mincho", anchor="middle", delay=1.0)
-    D.text(214, 210, "ROUTER", 8.6, P["ink"], anchor="middle", ls=0.6, delay=1.0)
-    nginx = D.node(300, 98, 96, 46, "門", "NGINX", "tls · limits", 0.8)
-    gate = D.node(428, 98, 118, 46, "関", "GATEWAY", "gunicorn · flask", 0.9)
-    trit = D.node(578, 98, 112, 46, "推", "TRITON", "9 engines · l4", 1.0)
-    lamb = D.node(300, 256, 390, 46, "雲", "SERVERLESS", "container lambda · onnx runtime + tflite", 0.9)
-    spool = D.node(430, 172, 112, 40, "蔵", "SPOOL", "retry · no drops", 1.2)
-    store = D.node(562, 172, 128, 40, "記", "S3 · DDB", "image + json log", 1.3)
-    resp = D.node(744, 172, 116, 52, "返", "RESPONSE", "same 7 fields", 1.25)
+    D.text(214, 203, "ROUTER", 12.5, P["ink"], fam="d8", anchor="middle", ls=0.8, delay=1.0)
+    nginx = D.node(300, 98, 96, 46, "NGINX", "tls · limits", 0.8)
+    gate = D.node(428, 98, 118, 46, "GATEWAY", "gunicorn · flask", 0.9)
+    trit = D.node(578, 98, 112, 46, "TRITON", "9 engines · l4", 1.0)
+    lamb = D.node(300, 256, 390, 46, "SERVERLESS", "container lambda · onnx runtime + tflite", 0.9)
+    spool = D.node(430, 172, 112, 40, "SPOOL", "retry · no drops", 1.2)
+    store = D.node(562, 172, 128, 40, "S3 · DDB", "image + json log", 1.3)
+    resp = D.node(744, 172, 116, 52, "RESPONSE", "same 7 fields", 1.25)
     w_in = D.wire([(152, 198), (180, 198)], 0.7)
     w_up = D.wire([(214, 164), (214, 121), (300, 121)], 0.85)
     w_dn = D.wire([(214, 232), (214, 279), (300, 279)], 0.85)
@@ -348,11 +342,11 @@ def dwg_serving(theme):
     D.text(226, 272, "main", 8.4, P["muted"], delay=1.6)
     D.text(270, 196, "fallback", 8.4, P["muted"], delay=1.7)
     D.text(270, 207, "non-2xx · 3 s", 8.4, P["muted"], delay=1.75)
-    D.dim(300, 690, 84, "gpu path · p50 156 ms · p95 205 ms", 1.8)
+    D.dim(300, 690, 87, "gpu path · p50 156 ms · p95 205 ms", 1.8)
     D.dim(300, 690, 318, "serverless · p50 1,415 ms · p95 1,714 ms", 1.9, below=True)
 
     T, N = 6.0, 3
-    shu, cyan, pink = P["shu"], P["cyan"], P["pink"]
+    red, cyan, pink = P["red"], P["cyan"], P["pink"]
     every = lambda a, b: loops(a, b, range(N), N)
     # main traffic: two requests per loop straight to serverless
     for o in (0.0, 0.5):
@@ -363,20 +357,20 @@ def dwg_serving(theme):
         D.flash(resp, every(o + 0.40, o + 0.47), N * T, P["ink2"], width=1.4)
     # the canary: loops 0-1 succeed on the gpu path, loop 2 fails over in pink
     ok, bad = (0, 1), (2,)
-    D.pulse(w_in, loops(0.20, 0.26, range(N), N), N * T, shu)
-    D.flash(backend, loops(0.18, 0.26, range(N), N), N * T, shu)
-    D.pulse(w_up, loops(0.26, 0.36, range(N), N), N * T, shu)
-    D.flash(nginx, loops(0.36, 0.42, ok, N), N * T, shu)
-    D.pulse(w_ng, loops(0.42, 0.47, ok, N), N * T, shu)
-    D.flash(gate, loops(0.47, 0.53, ok, N), N * T, shu)
-    D.pulse(w_gt, loops(0.53, 0.58, ok, N), N * T, shu)
-    D.flash(trit, loops(0.58, 0.66, ok, N), N * T, shu)
-    D.pulse(w_sp, loops(0.53, 0.58, ok, N), N * T, shu, length=10, width=1.6)
-    D.flash(spool, loops(0.58, 0.64, ok, N), N * T, shu, width=1.4)
-    D.pulse(w_st, loops(0.64, 0.68, ok, N), N * T, shu, length=10, width=1.6)
-    D.flash(store, loops(0.68, 0.76, ok, N), N * T, shu, width=1.4)
-    D.pulse(w_tr, loops(0.66, 0.76, ok, N), N * T, shu)
-    D.flash(resp, loops(0.76, 0.86, ok, N), N * T, shu)
+    D.pulse(w_in, loops(0.20, 0.26, range(N), N), N * T, red)
+    D.flash(backend, loops(0.18, 0.26, range(N), N), N * T, red)
+    D.pulse(w_up, loops(0.26, 0.36, range(N), N), N * T, red)
+    D.flash(nginx, loops(0.36, 0.42, ok, N), N * T, red)
+    D.pulse(w_ng, loops(0.42, 0.47, ok, N), N * T, red)
+    D.flash(gate, loops(0.47, 0.53, ok, N), N * T, red)
+    D.pulse(w_gt, loops(0.53, 0.58, ok, N), N * T, red)
+    D.flash(trit, loops(0.58, 0.66, ok, N), N * T, red)
+    D.pulse(w_sp, loops(0.53, 0.58, ok, N), N * T, red, length=10, width=1.6)
+    D.flash(spool, loops(0.58, 0.64, ok, N), N * T, red, width=1.4)
+    D.pulse(w_st, loops(0.64, 0.68, ok, N), N * T, red, length=10, width=1.6)
+    D.flash(store, loops(0.68, 0.76, ok, N), N * T, red, width=1.4)
+    D.pulse(w_tr, loops(0.66, 0.76, ok, N), N * T, red)
+    D.flash(resp, loops(0.76, 0.86, ok, N), N * T, red)
     D.flash(nginx, loops(0.36, 0.44, bad, N), N * T, pink)
     D.spark(300, 121, loops(0.36, 0.40, bad, N), N * T, pink, r=8)
     D.pulse(w_fb, loops(0.42, 0.52, bad, N), N * T, pink)
@@ -387,120 +381,40 @@ def dwg_serving(theme):
     return D.render()
 
 
-# ================================================================= 図03 gauges
-def dwg_gauges(theme):
-    D = Drawing(theme, 900, 340, "図03 before and after",
-                "Four wire gauges. Accuracy 79% to 91% on live traffic over 40M readings. End-to-end p50 1,415 ms to "
-                "156 ms, serverless to GPU path. Classifier compute 309.5 ms to 3.3 ms, ONNX Runtime to TensorRT. "
-                "Capacity 14.4 req/s production peak to 181 img/s on one L4.")
-    P = D.P
-    D.frame(3, "BEFORE → AFTER", "dashed needle: before · red needle: after · red arc: the gain")
-    gauges = [
-        ("精", "ACCURACY", 50, 100, [50, 60, 70, 80, 90, 100], lambda v: f"{v:g}", 79, 91, ("79", "91%"), "live traffic · 40M readings", False),
-        ("速", "P50 LATENCY", 0, 1600, [0, 400, 800, 1200, 1600], lambda v: f"{v / 1000:g}k" if v >= 1000 else f"{v:g}", 1415, 156, ("1,415", "156 ms"), "serverless → gpu path", False),
-        ("研", "CLASSIFIER", 1, 1000, [1, 10, 100, 1000], lambda v: "1k" if v == 1000 else f"{v:g}", 309.5, 3.3, ("309.5", "3.3 ms"), "onnx runtime → tensorrt", True),
-        ("量", "CAPACITY", 0, 200, [0, 50, 100, 150, 200], lambda v: f"{v:g}", 14.4, 181, ("14.4", "181/s"), "prod peak → one l4", False),
-    ]
-    R, cy = 70, 196
-    for i, (kj, label, lo, hi, ticks, fmt, before, after, (rb, ra), sub, logscale) in enumerate(gauges):
-        cx = 36 + 207 * i + 103.5
-        f = (lambda v: math.log10(v) / math.log10(hi)) if logscale else (lambda v: (v - lo) / (hi - lo))
-        ang = lambda v: 210 - 240 * f(v)
-        delay = 0.5 + 0.18 * i
-        lw = len(label) * (MONO_ADV * 10.5 + 1.2)
-        lx = cx - (13 + 6 + lw) / 2
-        D.text(lx, 100, kj, 13, P["shu"], fam="mincho", delay=delay)
-        D.text(lx + 19, 99, label, 10.5, P["ink"], ls=1.2, delay=delay)
-        D.path(arc_points(cx, cy, R, 210, -30), delay, P["ink"], 1.3, speed=500)
-        # ticks: majors labelled, minors between
-        minors = []
-        if logscale:
-            for e in range(3):
-                minors += [m * 10 ** e for m in range(2, 10)]
-        else:
-            step = (ticks[1] - ticks[0]) / 5
-            v = lo
-            while v <= hi + 1e-9:
-                minors.append(v)
-                v += step
-        for v in minors:
-            a = math.radians(ang(v))
-            D.path([(cx + (R - 5) * math.cos(a), cy - (R - 5) * math.sin(a)), (cx + R * math.cos(a), cy - R * math.sin(a))],
-                   delay + 0.4, P["muted"], 0.8)
-        for v in ticks:
-            a = math.radians(ang(v))
-            D.path([(cx + (R - 10) * math.cos(a), cy - (R - 10) * math.sin(a)), (cx + R * math.cos(a), cy - R * math.sin(a))],
-                   delay + 0.45, P["ink"], 1.2)
-            D.text(cx + (R + 17) * math.cos(a), cy - (R + 17) * math.sin(a) + 3, fmt(v), 8.2, P["muted"], anchor="middle", delay=delay + 0.6)
-        # ghost needle (before)
-        ab = math.radians(ang(before))
-        D.path([(cx, cy), (cx + (R - 16) * math.cos(ab), cy - (R - 16) * math.sin(ab))], delay + 0.7, P["muted"], 1.2, dashed="3 3")
-        # gain arc
-        D.path(arc_points(cx, cy, R + 5, ang(before), ang(after), 40), 2.3 + 0.2 * i, P["shu"], 2.2, speed=260)
-        # live needle: drawn pointing up, swept from before to after, then trembling a little
-        rot_b, rot_a = 90 - ang(before), 90 - ang(after)
-        nc, jc = D.uid("n"), D.uid("j")
-        D.css.append(
-            f".{nc}{{transform-box:view-box;transform-origin:{cx:.1f}px {cy}px;transform:rotate({rot_a:.2f}deg);"
-            f"animation:{nc} 1.6s cubic-bezier(.3,1.5,.55,1) {1.4 + 0.25 * i:.2f}s both}}"
-            f"@keyframes {nc}{{from{{transform:rotate({rot_b:.2f}deg)}}to{{transform:rotate({rot_a:.2f}deg)}}}}"
-            f".{jc}{{transform-box:view-box;transform-origin:{cx:.1f}px {cy}px;animation:jit {3.1 + 0.7 * i:.1f}s ease-in-out {START + 0.4 * i:.1f}s infinite}}"
-        )
-        D.add(f'<g class="{nc}"><g class="{jc}"><line x1="{cx:.1f}" y1="{cy + 10}" x2="{cx:.1f}" y2="{cy - R + 13}" '
-              f'stroke="{P["shu"]}" stroke-width="2.2" stroke-linecap="round"/></g></g>')
-        D.add(f'<circle cx="{cx:.1f}" cy="{cy}" r="5.5" fill="{P["ink"]}" class="{D.c_fade(delay + 0.3)}"/>')
-        D.add(f'<circle cx="{cx:.1f}" cy="{cy}" r="2" fill="{P["shu"]}" class="{D.c_fade(delay + 0.3)}"/>')
-        # readout
-        parts = [(rb, P["muted"]), (" → ", P["shu"]), (ra, P["ink"])]
-        widths = [len(t) * MONO_ADV * 13 for t, _ in parts]
-        x = cx - sum(widths) / 2
-        for (t, col), wdt in zip(parts, widths):
-            if t.strip():
-                D.text(x + (len(t) - len(t.lstrip())) * MONO_ADV * 13, cy + 44, t.strip(), 13, col, delay=2.4 + 0.2 * i)
-            x += wdt
-        D.text(cx, cy + 60, sub, 8.8, P["muted"], anchor="middle", delay=2.5 + 0.2 * i)
-        if i in (1, 2):
-            D.text(cx, cy + 22, "lower is better", 7.8, P["muted"], anchor="middle", delay=2.5)
-        # a rare spark at the needle tip
-        at = math.radians(ang(after))
-        tip = (cx + (R - 13) * math.cos(at), cy - (R - 13) * math.sin(at))
-        D.spark(*tip, [(0.20 + 0.18 * i, 0.215 + 0.18 * i)], 9.0 + i, P["cyan"] if i % 2 else P["pink"])
-    D.css.append("@keyframes jit{0%,100%{transform:rotate(0)}30%{transform:rotate(.9deg)}62%{transform:rotate(-.7deg)}}")
-    return D.render()
-
-
-# ================================================================= 図04 release flow
+# ================================================================= FIG 03 release flow
 def dwg_release(theme):
-    D = Drawing(theme, 900, 330, "図04 release flow",
-                "Blueprint of the release flow drawn as five torii gates on a track: train (DVC revision, git SHA), "
+    D = Drawing(theme, 900, 330, "FIG 03 · release flow",
+                "Line drawing of the release flow as five checkpoint gates on a track: train (DVC revision, git SHA), "
                 "export (ONNX to TensorRT, parity within 1.2e-5), benchmark (p50, p95, p99), deterministic A/B gate, "
                 "promote. A release token passes through; now and then the A/B gate rejects a regression and it rolls back.")
     P = D.P
-    D.frame(4, "RELEASE FLOW", "every model release passes five gates · a regression never reaches production")
+    D.frame(3, "RELEASE FLOW", "every model release passes five gates · a regression never reaches production")
     ty = 216
     D.path([(40, ty), (860, ty)], 0.4, P["ink"], 1.3, speed=1400)
     for k, x in enumerate(range(48, 860, 16)):
         D.path([(x, ty + 2), (x, ty + 7)], 0.6 + k * 0.004, P["faint"], 0.9)
-    stages = [("鍛", "TRAIN", "dvc rev · git sha · config"), ("変", "EXPORT", "onnx → tensorrt · Δ ≤ 1.2e-5"),
-              ("測", "BENCHMARK", "p50 · p95 · p99"), ("試", "A/B GATE", "deterministic split"),
-              ("昇", "PROMOTE", "registry stage → canary")]
+    stages = [("TRAIN", "dvc rev · git sha · config"), ("EXPORT", "onnx → tensorrt · Δ ≤ 1.2e-5"),
+              ("BENCHMARK", "p50 · p95 · p99"), ("A/B GATE", "deterministic split"),
+              ("PROMOTE", "registry stage → canary")]
     xs = [124, 286, 448, 610, 772]
     gates = []
-    for i, ((kj, name, sub), cx) in enumerate(zip(stages, xs)):
+    for i, ((name, sub), cx) in enumerate(zip(stages, xs)):
         dl = 0.7 + 0.22 * i
-        top = [(cx - 52, 121), (cx - 45, 126.5), (cx, 128), (cx + 45, 126.5), (cx + 52, 121)]
-        D.path(top, dl, P["ink"], 1.6, speed=300)
-        D.path([(cx - 44, 135), (cx + 44, 135)], dl + 0.15, P["ink"], 1.2)
-        D.path([(cx - 30, ty), (cx - 30, 129)], dl + 0.2, P["ink"], 1.4, speed=300)
-        D.path([(cx + 30, ty), (cx + 30, 129)], dl + 0.2, P["ink"], 1.4, speed=300)
-        D.path([(cx - 40, 150), (cx + 40, 150)], dl + 0.35, P["ink"], 1.2)
-        D.path([(cx, 135), (cx, 150)], dl + 0.4, P["ink"], 1.0)
-        D.text(cx, 109, kj, 14, P["shu"], fam="mincho", anchor="middle", delay=dl + 0.4)
-        D.text(cx, ty + 30, name, 11, P["ink"], anchor="middle", ls=1.0, delay=dl + 0.5)
-        D.text(cx, ty + 46, sub, 8.8, P["muted"], anchor="middle", delay=dl + 0.55)
-        beams = [top, [(cx - 44, 135), (cx + 44, 135)], [(cx - 30, ty), (cx - 30, 129)], [(cx + 30, ty), (cx + 30, 129)],
-                 [(cx - 40, 150), (cx + 40, 150)], [(cx, 135), (cx, 150)]]
-        gates.append(" ".join(pathd(b) for b in beams))
+        # a checkpoint: two posts, a cap with cut ends, a scanner bar and a status lamp
+        cap = [(cx - 42, 132), (cx - 36, 126), (cx + 36, 126), (cx + 42, 132)]
+        posts = [[(cx - 30, ty), (cx - 30, 126)], [(cx + 30, ty), (cx + 30, 126)]]
+        bar = [(cx - 30, 146), (cx + 30, 146)]
+        D.path(cap, dl, P["ink"], 1.6, speed=300)
+        for post in posts:
+            D.path(post, dl + 0.15, P["ink"], 1.4, speed=300)
+        D.path(bar, dl + 0.35, P["ink2"], 1.0, dashed="3 3")
+        D.add(f'<rect x="{cx - 4}" y="{114}" width="8" height="8" fill="none" stroke="{P["ink2"]}" stroke-width="1.1" '
+              f'class="{D.c_fade(dl + 0.4)}"/>')
+        D.text(cx, 104, f"{i + 1:02d}", 13, P["muted"], fam="d8", anchor="middle", ls=1.0, delay=dl + 0.4)
+        D.text(cx, ty + 31, name, 15, P["ink"], fam="d8", anchor="middle", ls=1.0, delay=dl + 0.5)
+        D.text(cx, ty + 47, sub, 8.8, P["muted"], anchor="middle", delay=dl + 0.55)
+        lamp = f"M{cx - 4} 114 h8 v8 h-8 Z"
+        gates.append(" ".join([pathd(cap), *(pathd(q) for q in posts), pathd(bar), lamp]))
 
     # token: three runs per period; runs 0-1 pass every gate, run 2 is rejected at the A/B gate
     T, N = 7.0, 3
@@ -537,9 +451,8 @@ def dwg_release(theme):
     kc = D.uid("tok")
     kf = "".join(f"{pct(t)}{{transform:translateX({x - x_start:.1f}px);opacity:{o}}}" for t, x, o in frames)
     D.css.append(f"@keyframes {kc}{{{kf}}}.{kc}{{opacity:0;animation:{kc} {period:.1f}s linear {START}s infinite both}}")
-    D.add(f'<g class="{kc}"><rect x="{x_start - 7}" y="{ty - 16}" width="14" height="14" rx="2" fill="{P["shu"]}"/>'
-          f'<path d="M{x_start - 3.5} {ty - 11.5} h7 M{x_start - 3.5} {ty - 8.5} h7 M{x_start - 3.5} {ty - 5.5} h4.5" '
-          f'stroke="{P["cut"]}" stroke-width="1.1"/></g>')
+    D.add(f'<g class="{kc}"><path d="M{x_start} {ty - 19} l9 9 l-9 9 l-9 -9 Z" fill="{P["red"]}"/>'
+          f'<path d="M{x_start} {ty - 14} v8" stroke="{P["on_red"]}" stroke-width="1.6" stroke-linecap="round"/></g>')
     # each gate lights as the token passes; checks appear above
     for k in range(N):
         fail = k == 2
@@ -549,7 +462,7 @@ def dwg_release(theme):
             if not hits:
                 continue
             a, b = min(hits) - 0.004, max(hits) + 0.02
-            col = P["pink"] if (fail and gi == 3) else P["shu"]
+            col = P["pink"] if (fail and gi == 3) else P["red"]
             D.flash(gates[gi], [(a, b)], period, col, width=2.2)
             mark = "× regression" if (fail and gi == 3) else "✓"
             D.blink_text(cx, 86, mark, [(a, min((k + 1) / N - 0.01, b + 0.18))], period, col, size=11)
@@ -558,28 +471,28 @@ def dwg_release(theme):
     return D.render()
 
 
-# ================================================================= 図05 ARD method
+# ================================================================= FIG 04 ARD method
 def dwg_ard(theme):
-    D = Drawing(theme, 900, 420, "図05 ARD method",
+    D = Drawing(theme, 900, 420, "FIG 04 · ARD method",
                 "Blueprint of ARD on SVTRv2. Deployed path, solid: crop, a ~40k-parameter router choosing one of four "
                 "MSR buckets, SVTRv2 backbone with FRM, CTC head, text. Training only, dashed: the crop is rendered on "
                 "two canvases, per-character CTC loss decides which reads better, and a Bradley-Terry preference loss "
                 "trains the router; SGM's left and right streams form a soft teacher distilled into the CTC head at "
                 "aligned timesteps (uniform or Viterbi) with KL plus cross-entropy.")
     P = D.P
-    D.frame(5, "ARD · SVTRV2 EXTENDED", "solid: what ships (ctc only) · dashed: training only, never exported")
+    D.frame(4, "ARD · SVTRV2 EXTENDED", "solid: what ships (ctc only) · dashed: training only, never exported")
     cy = 150
-    crop = D.node(40, 124, 92, 52, "写", "CROP", "any aspect", 0.5)
-    router = D.node(164, 124, 118, 52, "分", "ROUTER", "~40k params", 0.65)
+    crop = D.node(40, 124, 92, 52, "CROP", "any aspect", 0.5)
+    router = D.node(164, 124, 118, 52, "ROUTER", "~40k params", 0.65)
     bins = []
     for k, nm in enumerate(("short", "medium", "long", "xlong")):
         y = 104 + k * 24
         d = D.box(312, y, 66, 18, 0.8 + 0.05 * k, width=1.0)
         D.text(345, y + 12.5, nm, 8.4, P["ink2"], anchor="middle", delay=1.0)
         bins.append((d, y))
-    svtr = D.node(410, 124, 140, 52, "骨", "SVTRv2", "mixing · frm", 0.95)
-    head = D.node(582, 124, 104, 52, "頭", "CTC HEAD", "w/4 steps", 1.1)
-    text = D.node(718, 124, 142, 52, "文", "TEXT", '"shinkansen" 0.98', 1.25, sub_fill=P["ink2"])
+    svtr = D.node(410, 124, 140, 52, "SVTRv2", "mixing · frm", 0.95)
+    head = D.node(582, 124, 104, 52, "CTC HEAD", "w/4 steps", 1.1)
+    text = D.node(718, 124, 142, 52, "TEXT", '"shinkansen" 0.98', 1.25, sub_fill=P["ink2"])
     w_cr = D.wire([(132, cy), (164, cy)], 0.7)
     w_rb = [D.wire([(282, cy), (297, cy), (297, y + 9), (312, y + 9)], 0.85, r=4, width=1.0) for _, y in bins]
     w_bs = [D.wire([(378, y + 9), (394, y + 9), (394, cy), (410, cy)], 0.9, r=4, width=1.0) for _, y in bins]
@@ -588,11 +501,11 @@ def dwg_ard(theme):
     D.dim(164, 860, 92, "ships: router + the unchanged ctc model · no extra decoder", 1.5)
     # training-only lane
     dash = "4 3"
-    explore = D.node(40, 262, 120, 48, "試", "EXPLORE", "canvas a vs b", 1.3, dashed=dash)
-    ctcl = D.node(192, 262, 112, 48, "測", "CTC LOSS", "per character", 1.4, dashed=dash)
-    bt = D.node(336, 262, 136, 48, "比", "PREFERENCE", "bradley–terry", 1.5, dashed=dash)
-    sgm = D.node(504, 262, 104, 48, "双", "SGM", "left · right", 1.45, dashed=dash)
-    teach = D.node(640, 262, 108, 48, "師", "TEACHER", "soft q · τ", 1.55, dashed=dash)
+    explore = D.node(40, 262, 120, 48, "EXPLORE", "canvas a vs b", 1.3, dashed=dash)
+    ctcl = D.node(192, 262, 112, 48, "CTC LOSS", "per character", 1.4, dashed=dash)
+    bt = D.node(336, 262, 136, 48, "PREFERENCE", "bradley–terry", 1.5, dashed=dash)
+    sgm = D.node(504, 262, 104, 48, "SGM", "left · right", 1.45, dashed=dash)
+    teach = D.node(640, 262, 108, 48, "TEACHER", "soft q · τ", 1.55, dashed=dash)
     w_ce = D.wire([(86, 176), (86, 262)], 1.5, dashed=dash, width=1.0)
     w_el = D.wire([(160, 286), (192, 286)], 1.55, dashed=dash, width=1.0)
     w_lb = D.wire([(304, 286), (336, 286)], 1.6, dashed=dash, width=1.0)
@@ -608,19 +521,19 @@ def dwg_ard(theme):
     D.text(40, 358, "status: implemented and tested; benchmark runs pending, so no accuracy claims yet", 9, P["muted"], delay=2.2)
 
     T, N = 6.0, 4
-    shu, cyan, pink = P["shu"], P["cyan"], P["pink"]
+    red, cyan, pink = P["red"], P["cyan"], P["pink"]
     every = lambda a, b: loops(a, b, range(N), N)
-    D.pulse(w_cr, every(0.00, 0.08), N * T, shu)
-    D.flash(router, every(0.08, 0.16), N * T, shu)
+    D.pulse(w_cr, every(0.00, 0.08), N * T, red)
+    D.flash(router, every(0.08, 0.16), N * T, red)
     for k in range(4):  # the router picks a different bucket each photo
-        D.pulse(w_rb[k], loops(0.16, 0.24, (k,), N), N * T, shu, length=12)
-        D.flash(bins[k][0], loops(0.24, 0.34, (k,), N), N * T, shu)
-        D.pulse(w_bs[k], loops(0.32, 0.40, (k,), N), N * T, shu, length=12)
-    D.flash(svtr, every(0.40, 0.50), N * T, shu)
-    D.pulse(w_sh, every(0.50, 0.57), N * T, shu)
-    D.flash(head, every(0.57, 0.65), N * T, shu)
-    D.pulse(w_ht, every(0.65, 0.72), N * T, shu)
-    D.flash(text, every(0.72, 0.90), N * T, shu)
+        D.pulse(w_rb[k], loops(0.16, 0.24, (k,), N), N * T, red, length=12)
+        D.flash(bins[k][0], loops(0.24, 0.34, (k,), N), N * T, red)
+        D.pulse(w_bs[k], loops(0.32, 0.40, (k,), N), N * T, red, length=12)
+    D.flash(svtr, every(0.40, 0.50), N * T, red)
+    D.pulse(w_sh, every(0.50, 0.57), N * T, red)
+    D.flash(head, every(0.57, 0.65), N * T, red)
+    D.pulse(w_ht, every(0.65, 0.72), N * T, red)
+    D.flash(text, every(0.72, 0.90), N * T, red)
     pref = (1, 3)
     D.pulse(w_ce, loops(0.10, 0.20, pref, N), N * T, cyan)
     D.flash(explore, loops(0.20, 0.28, pref, N), N * T, cyan)
@@ -640,9 +553,9 @@ def dwg_ard(theme):
     return D.render()
 
 
-# ================================================================= 図06 ECHOME memory loop
+# ================================================================= FIG 05 ECHOME memory loop
 def dwg_echome(theme):
-    D = Drawing(theme, 900, 420, "図06 ECHOME memory loop",
+    D = Drawing(theme, 900, 420, "FIG 05 · ECHOME memory loop",
                 "Blueprint of ECHOME: a user turn goes to a LangGraph orchestrator that classifies intent with a local "
                 "LLM, retrieves memory by cosine similarity times recency decay, and dispatches to a tech agent or an "
                 "allowlisted bash agent. The reply is stored as an episode in Qdrant; episode clusters are consolidated "
@@ -650,19 +563,19 @@ def dwg_echome(theme):
                 "personality traits into semantic memory. An eval harness runs 12 multi-session scenarios with "
                 "full, episodic-only and no-memory ablations.")
     P = D.P
-    D.frame(6, "ECHOME · MEMORY LOOP", "an agent that remembers across sessions, and a harness that checks it actually does")
-    turn = D.node(40, 112, 96, 48, "入", "TURN", "user message", 0.5)
-    orch = D.node(166, 106, 150, 60, "分", "ORCHESTRATOR", "langgraph · llm intent", 0.65)
-    tech = D.node(350, 88, 124, 40, "技", "TECH", "answers from memory", 0.8)
-    bash = D.node(350, 144, 124, 40, "殻", "BASH", "allowlist sandbox", 0.85)
-    reply = D.node(508, 112, 104, 48, "返", "REPLY", "stored as episode", 1.0)
-    ev = D.node(650, 96, 210, 88, "試", "EVAL HARNESS", "recall · context hit · latency", 1.1, dashed="4 3")
+    D.frame(5, "ECHOME · MEMORY LOOP", "an agent that remembers across sessions, and a harness that checks it actually does")
+    turn = D.node(40, 112, 96, 48, "TURN", "user message", 0.5)
+    orch = D.node(166, 106, 150, 60, "ORCHESTRATOR", "langgraph · llm intent", 0.65)
+    tech = D.node(350, 88, 124, 40, "TECH", "answers from memory", 0.8)
+    bash = D.node(350, 144, 124, 40, "BASH", "allowlist sandbox", 0.85)
+    reply = D.node(508, 112, 114, 48, "REPLY", "stored as episode", 1.0)
+    ev = D.node(650, 96, 210, 88, "EVAL HARNESS", "recall · context hit · latency", 1.1, dashed="4 3")
     D.text(658, 132, "12 scenarios · recall 2–52 turns", 8.8, P["ink2"], delay=1.5)
     D.text(658, 147, "full · episodic-only · no memory", 8.8, P["ink2"], delay=1.55)
-    epi = D.node(166, 240, 150, 52, "記", "EPISODIC", "qdrant · minilm", 1.15)
-    sem = D.node(384, 240, 140, 52, "識", "SEMANTIC", "consolidated facts", 1.25)
-    proc = D.node(592, 240, 140, 52, "型", "PROCEDURAL", "mined patterns", 1.35)
-    cat = D.node(384, 334, 140, 46, "測", "CAT · IRT", "grm · fisher · map", 1.45)
+    epi = D.node(166, 240, 150, 52, "EPISODIC", "qdrant · minilm", 1.15)
+    sem = D.node(384, 240, 140, 52, "SEMANTIC", "consolidated facts", 1.25)
+    proc = D.node(592, 240, 140, 52, "PROCEDURAL", "mined patterns", 1.35)
+    cat = D.node(384, 334, 140, 46, "CAT · IRT", "grm · fisher · map", 1.45)
     w1 = D.wire([(136, 136), (166, 136)], 0.7)
     w_ot = D.wire([(316, 128), (333, 128), (333, 108), (350, 108)], 0.85, r=5)
     w_ob = D.wire([(316, 146), (333, 146), (333, 164), (350, 164)], 0.85, r=5)
@@ -673,7 +586,7 @@ def dwg_echome(theme):
     w_con = D.wire([(316, 266), (384, 266)], 1.35)
     w_min = D.wire([(241, 292), (241, 314), (662, 314), (662, 292)], 1.45)
     w_cat = D.wire([(454, 334), (454, 292)], 1.55)
-    w_ev = D.wire([(650, 136), (612, 136)], 1.5, dashed="4 3", width=1.0)
+    w_ev = D.wire([(650, 136), (622, 136)], 1.5, dashed="4 3", width=1.0)
     D.text(235, 230, "cos × recency", 8.4, P["muted"], anchor="end", delay=1.8)
     D.text(566, 190, "store", 8.4, P["muted"], delay=1.8)
     D.text(350, 259, "llm", 8.4, P["muted"], anchor="middle", delay=1.85)
@@ -683,25 +596,25 @@ def dwg_echome(theme):
     D.text(40, 371, "72 unit tests · runs fully on-device with ollama", 8.6, P["muted"], delay=2.05)
 
     T, N = 7.0, 2
-    shu, cyan, pink = P["shu"], P["cyan"], P["pink"]
+    red, cyan, pink = P["red"], P["cyan"], P["pink"]
     every = lambda a, b: loops(a, b, range(N), N)
-    D.pulse(w1, every(0.00, 0.07), N * T, shu)
-    D.flash(orch, every(0.07, 0.17), N * T, shu)
-    D.flash(epi, every(0.05, 0.12), N * T, shu, width=1.4)
-    D.pulse(w_ret, every(0.07, 0.15), N * T, shu)
-    D.pulse(w_ot, loops(0.17, 0.24, (0,), N), N * T, shu)
-    D.flash(tech, loops(0.24, 0.32, (0,), N), N * T, shu)
-    D.pulse(w_tr, loops(0.32, 0.39, (0,), N), N * T, shu)
-    D.pulse(w_ob, loops(0.17, 0.24, (1,), N), N * T, shu)
-    D.flash(bash, loops(0.24, 0.32, (1,), N), N * T, shu)
-    D.pulse(w_br, loops(0.32, 0.39, (1,), N), N * T, shu)
-    D.flash(reply, every(0.39, 0.47), N * T, shu)
-    D.pulse(w_sto, every(0.47, 0.60), N * T, shu)
-    D.flash(epi, every(0.60, 0.68), N * T, shu)
-    D.pulse(w_con, loops(0.68, 0.76, (0,), N), N * T, shu)
-    D.flash(sem, loops(0.76, 0.86, (0,), N), N * T, shu)
-    D.pulse(w_min, loops(0.68, 0.82, (1,), N), N * T, shu)
-    D.flash(proc, loops(0.82, 0.92, (1,), N), N * T, shu)
+    D.pulse(w1, every(0.00, 0.07), N * T, red)
+    D.flash(orch, every(0.07, 0.17), N * T, red)
+    D.flash(epi, every(0.05, 0.12), N * T, red, width=1.4)
+    D.pulse(w_ret, every(0.07, 0.15), N * T, red)
+    D.pulse(w_ot, loops(0.17, 0.24, (0,), N), N * T, red)
+    D.flash(tech, loops(0.24, 0.32, (0,), N), N * T, red)
+    D.pulse(w_tr, loops(0.32, 0.39, (0,), N), N * T, red)
+    D.pulse(w_ob, loops(0.17, 0.24, (1,), N), N * T, red)
+    D.flash(bash, loops(0.24, 0.32, (1,), N), N * T, red)
+    D.pulse(w_br, loops(0.32, 0.39, (1,), N), N * T, red)
+    D.flash(reply, every(0.39, 0.47), N * T, red)
+    D.pulse(w_sto, every(0.47, 0.60), N * T, red)
+    D.flash(epi, every(0.60, 0.68), N * T, red)
+    D.pulse(w_con, loops(0.68, 0.76, (0,), N), N * T, red)
+    D.flash(sem, loops(0.76, 0.86, (0,), N), N * T, red)
+    D.pulse(w_min, loops(0.68, 0.82, (1,), N), N * T, red)
+    D.flash(proc, loops(0.82, 0.92, (1,), N), N * T, red)
     D.pulse(w_cat, [(0.30, 0.36)], 3 * T, pink)
     D.flash(sem, [(0.36, 0.42)], 3 * T, pink)
     D.pulse(w_ev, every(0.86, 0.93), N * T, cyan, length=12)
@@ -709,9 +622,9 @@ def dwg_echome(theme):
     return D.render()
 
 
-# ================================================================= 図07 FinSentinel RAG
+# ================================================================= FIG 06 FinSentinelAI RAG
 def dwg_finsentinel(theme):
-    D = Drawing(theme, 900, 420, "図07 FinSentinelAI RAG",
+    D = Drawing(theme, 900, 420, "FIG 06 · FinSentinelAI RAG",
                 "Blueprint of FinSentinelAI. Ingest: upload with JWT into a per-user folder, parse with pdfplumber or "
                 "Tesseract OCR, embed with all-MiniLM-L6-v2 on CPU, store in ChromaDB tagged with the user's session. "
                 "Ask: retrieve the top 20 chunks from the user's own documents, rerank to 10 with a cross-encoder, "
@@ -719,23 +632,23 @@ def dwg_finsentinel(theme):
                 "Built but not yet wired in, dashed: a six-type document extractor, invoice total checks, anomaly "
                 "scoring and exact SQL answers.")
     P = D.P
-    D.frame(7, "FINSENTINELAI · PRIVATE RAG", "documents never leave the machine · dashed: built, next to wire in")
-    up = D.node(40, 98, 112, 52, "入", "UPLOAD", "jwt · own folder", 0.5)
-    parse = D.node(184, 98, 124, 52, "読", "PARSE", "pdfplumber · ocr", 0.6)
-    emb = D.node(340, 98, 124, 52, "埋", "EMBED", "minilm-l6 · cpu", 0.7)
-    chroma = D.node(496, 98, 124, 52, "蔵", "CHROMADB", "tagged by user", 0.8)
-    ask = D.node(40, 272, 112, 52, "問", "ASK", "jwt · user id", 0.9)
-    ret = D.node(184, 272, 124, 52, "索", "RETRIEVE", "top-20 · own docs", 1.0)
-    rr = D.node(340, 272, 124, 52, "順", "RERANK", "cross-encoder → 10", 1.1)
-    llm = D.node(496, 272, 124, 52, "答", "OLLAMA", "+ last 6 turns", 1.2)
-    ans = D.node(652, 272, 100, 52, "返", "ANSWER", "+ sources", 1.3)
-    aud = D.node(784, 272, 76, 52, "記", "AUDIT", "every q", 1.4)
+    D.frame(6, "FINSENTINELAI · PRIVATE RAG", "documents never leave the machine · dashed: built, next to wire in")
+    up = D.node(40, 98, 112, 52, "UPLOAD", "jwt · own folder", 0.5)
+    parse = D.node(184, 98, 124, 52, "PARSE", "pdfplumber · ocr", 0.6)
+    emb = D.node(340, 98, 124, 52, "EMBED", "minilm-l6 · cpu", 0.7)
+    chroma = D.node(496, 98, 124, 52, "CHROMADB", "tagged by user", 0.8)
+    ask = D.node(40, 272, 112, 52, "ASK", "jwt · user id", 0.9)
+    ret = D.node(184, 272, 124, 52, "RETRIEVE", "top-20 · own docs", 1.0)
+    rr = D.node(340, 272, 124, 52, "RERANK", "cross-encoder → 10", 1.1)
+    llm = D.node(496, 272, 124, 52, "OLLAMA", "+ last 6 turns", 1.2)
+    ans = D.node(652, 272, 100, 52, "ANSWER", "+ sources", 1.3)
+    aud = D.node(784, 272, 76, 52, "AUDIT", "every q", 1.4)
     dash = "4 3"
     D.text(652, 90, "built · next to wire in", 8.6, P["muted"], delay=1.5)
-    ext = D.node(652, 98, 100, 40, "抽", "EXTRACT", "6 doc kinds", 1.5, dashed=dash)
-    ver = D.node(768, 98, 92, 40, "検", "VERIFY", "sum ± .05", 1.55, dashed=dash)
-    ano = D.node(652, 150, 100, 40, "異", "ANOMALY", "iforest · z≥3", 1.6, dashed=dash)
-    exa = D.node(768, 150, 92, 40, "数", "EXACT", "sql totals", 1.65, dashed=dash)
+    ext = D.node(652, 98, 100, 40, "EXTRACT", "6 doc kinds", 1.5, dashed=dash)
+    ver = D.node(768, 98, 92, 40, "VERIFY", "sum ± .05", 1.55, dashed=dash)
+    ano = D.node(652, 150, 100, 40, "ANOMALY", "iforest · z≥3", 1.6, dashed=dash)
+    exa = D.node(768, 150, 92, 40, "EXACT", "sql totals", 1.65, dashed=dash)
     w_up = D.wire([(152, 124), (184, 124)], 0.6)
     w_pe = D.wire([(308, 124), (340, 124)], 0.7)
     w_ec = D.wire([(464, 124), (496, 124)], 0.8)
@@ -752,15 +665,15 @@ def dwg_finsentinel(theme):
     D.text(40, 370, "invoices · bank statements · salary slips · gst returns · credit/debit notes · purchase orders", 9, P["muted"], delay=2.1)
 
     T, N = 6.5, 3
-    shu, cyan, pink = P["shu"], P["cyan"], P["pink"]
+    red, cyan, pink = P["red"], P["cyan"], P["pink"]
     every = lambda a, b: loops(a, b, range(N), N)
-    D.flash(up, every(0.00, 0.06), N * T, shu)
-    D.pulse(w_up, every(0.05, 0.12), N * T, shu)
-    D.flash(parse, every(0.12, 0.20), N * T, shu)
-    D.pulse(w_pe, every(0.20, 0.27), N * T, shu)
-    D.flash(emb, every(0.27, 0.35), N * T, shu)
-    D.pulse(w_ec, every(0.35, 0.42), N * T, shu)
-    D.flash(chroma, every(0.42, 0.50), N * T, shu)
+    D.flash(up, every(0.00, 0.06), N * T, red)
+    D.pulse(w_up, every(0.05, 0.12), N * T, red)
+    D.flash(parse, every(0.12, 0.20), N * T, red)
+    D.pulse(w_pe, every(0.20, 0.27), N * T, red)
+    D.flash(emb, every(0.27, 0.35), N * T, red)
+    D.pulse(w_ec, every(0.35, 0.42), N * T, red)
+    D.flash(chroma, every(0.42, 0.50), N * T, red)
     D.flash(ask, every(0.40, 0.46), N * T, cyan)
     D.pulse(w_ar, every(0.45, 0.52), N * T, cyan)
     D.flash(ret, every(0.52, 0.62), N * T, cyan)
@@ -779,25 +692,14 @@ def dwg_finsentinel(theme):
 
 # ================================================================= whoami terminal
 WHOAMI = """{
-  "whoami": "Lourdu Raju",
-  "role": "Machine Learning Engineer @ Sujanix",
+  "agent": "Lourdu Raju",
+  "class": "ML engineer · computer vision",
   "base": "Bengaluru, India",
-  "mission": "make vision models fast, honest, and boring to run",
-  "now": {
-    "building": "meter-reading OCR for a state electricity utility",
-    "readings_in_prod": "40M",
-    "accuracy": "79% → 91%",
-    "busiest_day_requests": 330707,
-    "p50_ms": 156
-  },
-  "craft": ["computer vision", "gpu inference", "mlops", "agents"],
-  "weapons": ["pytorch", "tensorrt", "triton", "onnx runtime", "aws", "langgraph"],
+  "now": "meter-reading OCR for a state electricity utility",
+  "loadout": ["pytorch", "tensorrt", "triton", "onnx", "aws", "langgraph"],
+  "side_quests": ["svtrv2", "echome", "finsentinel.ai"],
   "code": ["measure first", "ship second", "talk last"],
-  "crew": {
-    "discipline": "Miyamoto Musashi",
-    "chaos": "Jinx",
-    "freedom": "Monkey D. Luffy"
-  },
+  "crew": { "discipline": "Musashi", "chaos": "Jinx", "freedom": "Luffy" },
   "open_to_ml_roles": true
 }"""
 
@@ -805,32 +707,37 @@ TOKEN = re.compile(r'("(?:[^"\\]|\\.)*")(\s*:)?|(-?\d+(?:\.\d+)?)|(true|false|nu
 
 
 def whoami(theme):
+    """An agent file: a panel cut like the hero's that types `cat whoami.json` and prints it, syntax-coloured."""
     P = PALETTES[theme]
     fonts = Fonts()
-    size, lh = 13.2, 19.5
+    size, lh = 13.2, 20.5
     cw = MONO_ADV * size
     lines = WHOAMI.split("\n")
-    x0, y_prompt = 40, 80
+    x0, y_prompt = 40, 88
     y_first = y_prompt + 30
-    H = int(y_first + len(lines) * lh + 52)
+    H = int(y_first + len(lines) * lh + 36)
     W = 900
     css, body, defs = [], [], []
-    css.append("@keyframes fade{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}"
-               ".mono{font-family:mono}")
-    # window chrome
-    body.append(f'<rect x="14" y="14" width="{W - 28}" height="{H - 28}" rx="10" fill="none" stroke="{P["faint"]}" stroke-width="1.2"/>')
-    body.append(f'<line x1="14" y1="46" x2="{W - 14}" y2="46" stroke="{P["faint"]}" stroke-width="1"/>')
-    for k, col in enumerate((P["shu"], P["muted"], P["cyan"])):
-        body.append(f'<circle cx="{36 + k * 18}" cy="30" r="5" fill="{col}"/>')
-    title = "whoami.json — ~/lourdu"
-    fonts.use("mono", title)
-    body.append(f'<text x="{W / 2}" y="34" class="mono" font-size="10.5" fill="{P["muted"]}" text-anchor="middle">{escape(title)}</text>')
-    fonts.use("mincho", "侍")
-    body.append(f'<text x="{W - 40}" y="35" class="mincho" font-size="13" fill="{P["shu"]}" text-anchor="end">侍</text>')
+    css.append("@keyframes fade{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}")
+    card = chamfer(0.75, 0.75, W - 1.5, H - 1.5, tr=26, bl=26)
+    body.append(f'<path d="{pathd(card)}Z" fill="{P["card"]}" stroke="{P["card_line"]}" stroke-width="1.5"/>')
+    tag = "AGENT FILE"
+    fonts.use("d8", tag)
+    tw = text_width("d8", tag, 13, 1.4) + 22
+    body.append(f'<path d="M{x0 + 7} 26 H{x0 + tw:.1f} L{x0 + tw - 7:.1f} 46 H{x0} Z" fill="{P["red"]}"/>')
+    body.append(f'<text x="{x0 + 12}" y="41" class="d8" font-size="13" fill="{P["on_red"]}" letter-spacing="1.4">{tag}</text>')
+    where = "~/lourdu/whoami.json"
+    fonts.use("mono", where)
+    body.append(f'<text x="{x0 + tw + 12:.1f}" y="40.5" class="mono" font-size="11" fill="{P["muted"]}" letter-spacing=".8">{escape(where)}</text>')
+    ro = "READ-ONLY"
+    fonts.use("mono", ro)
+    body.append(f'<text x="{W - 40}" y="40.5" class="mono" font-size="11" fill="{P["muted"]}" letter-spacing="1.6" text-anchor="end">{ro}</text>')
+    body.append(f'<path d="M{x0} 58 H{W - 40}" stroke="{P["card_line"]}" stroke-width="1.2"/>')
+    body.append(f'<path d="M{x0} 58 H{x0 + 56}" stroke="{P["red"]}" stroke-width="2.4"/>')
 
     def prompt(y, cls=""):
         fonts.use("mono", "~$")
-        body.append(f'<text x="{x0}" y="{y}" class="mono {cls}" font-size="{size}" fill="{P["muted"]}">~ <tspan fill="{P["shu"]}">$</tspan></text>')
+        body.append(f'<text x="{x0}" y="{y}" class="mono {cls}" font-size="{size}" fill="{P["muted"]}">~ <tspan fill="{P["red"]}">$</tspan></text>')
 
     # typed command
     prompt(y_prompt)
@@ -847,60 +754,53 @@ def whoami(theme):
     )
     body.append(f'<text x="{cx0:.1f}" y="{y_prompt}" class="mono" font-size="{size}" fill="{P["ink"]}" clip-path="url(#cmd)">{cmd}</text>')
 
-    # JSON, one line at a time, syntax-coloured
+    # JSON, one line at a time: keys red, strings ink, numbers cyan, booleans pink
     start = t0 + len(cmd) * dt + 0.35
     for i, line in enumerate(lines):
         indent = len(line) - len(line.lstrip(" "))
+        assert x0 + len(line) * cw < W - 40, line
         y = y_first + i * lh
-        spans = []
-        for m in TOKEN.finditer(line.lstrip(" ")):
-            s, colon, num, kw, punct, space = m.groups()
-            if s is not None:
-                col = P["shu"] if colon else P["ink"]
-                spans.append((s, col))
-                if colon:
-                    spans.append((colon.strip(), P["muted"]))
-            elif num is not None:
-                spans.append((num, P["cyan"]))
-            elif kw is not None:
-                spans.append((kw, P["pink"]))
-            elif punct is not None:
-                spans.append((punct, P["muted"]))
-            elif space is not None:
-                spans.append((" ", None))
         tsp = []
-        for text, col in spans:
-            fonts.use("mono", text)
-            if col is None:
-                tsp.append(" ")
+        for m in TOKEN.finditer(line.lstrip(" ")):
+            st, colon, num, kw, punct, _space = m.groups()
+            if st is not None:
+                spans = [(st, P["red"] if colon else P["ink"])] + ([(colon.strip(), P["muted"])] if colon else [])
+            elif num is not None:
+                spans = [(num, P["cyan"])]
+            elif kw is not None:
+                spans = [(kw, P["pink"])]
+            elif punct is not None:
+                spans = [(punct, P["muted"])]
             else:
-                tsp.append(f'<tspan fill="{col}">{escape(text)}</tspan>')
+                spans = [(" ", None)]
+            for text, col in spans:
+                fonts.use("mono", text)
+                tsp.append(" " if col is None else f'<tspan fill="{col}">{escape(text)}</tspan>')
         c = f"l{i}"
-        css.append(f".{c}{{animation:fade .22s ease-out {start + i * 0.07:.2f}s both}}")
+        css.append(f".{c}{{animation:fade .22s ease-out {start + i * 0.08:.2f}s both}}")
         body.append(f'<text x="{x0 + indent * cw:.1f}" y="{y:.1f}" class="mono {c}" font-size="{size}" xml:space="preserve">{"".join(tsp)}</text>')
 
     # fresh prompt with a blinking cursor
     y_end = y_first + len(lines) * lh + 8
-    t_end = start + len(lines) * 0.07 + 0.3
+    t_end = start + len(lines) * 0.08 + 0.3
     css.append(f".pe{{animation:fade .2s ease-out {t_end:.2f}s both}}"
                f".cur{{animation:fade .2s ease-out {t_end:.2f}s both,blink 1.05s steps(1) {t_end:.2f}s infinite}}"
                "@keyframes blink{0%{opacity:1}50%{opacity:0}}")
     prompt(y_end, "pe")
-    body.append(f'<rect class="cur" x="{x0 + 4 * cw:.1f}" y="{y_end - size * 0.82:.1f}" width="{cw * 0.75:.1f}" height="{size * 1.02:.1f}" fill="{P["shu"]}"/>')
+    body.append(f'<rect class="cur" x="{x0 + 4 * cw:.1f}" y="{y_end - size * 0.8:.1f}" width="{cw * 0.62:.1f}" height="{size:.1f}" fill="{P["red"]}"/>')
 
     style = fonts.css() + "".join(css)
     return svg_doc(W, H, "whoami.json",
-                   "A terminal runs cat whoami.json: " + " ".join(l.strip() for l in lines),
+                   "An agent file. A terminal runs cat whoami.json: " + " ".join(l.strip() for l in lines),
                    style, "".join(body), "".join(defs))
 
 
 DRAWINGS = {
     "whoami": whoami,
-    "dwg01-pipeline": dwg_pipeline,
-    "dwg02-serving": dwg_serving,
-    "dwg03-gauges": dwg_gauges,
-    "dwg04-release": dwg_release,
-    "dwg05-ard": dwg_ard,
-    "dwg06-echome": dwg_echome,
-    "dwg07-finsentinel": dwg_finsentinel,
+    "fig01-pipeline": dwg_pipeline,
+    "fig02-serving": dwg_serving,
+    "fig03-release": dwg_release,
+    "fig04-ard": dwg_ard,
+    "fig05-echome": dwg_echome,
+    "fig06-finsentinel": dwg_finsentinel,
 }
