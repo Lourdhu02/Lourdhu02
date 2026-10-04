@@ -287,9 +287,10 @@ def katana(theme):
 
 def main():
     from bp import DRAWINGS
+    from icons import arsenal
     OUT.mkdir(parents=True, exist_ok=True)
     for theme in ("light", "dark"):
-        for name, fn in (("hero", hero), ("katana", katana), *DRAWINGS.items()):
+        for name, fn in (("hero", hero), ("katana", katana), ("arsenal", arsenal), *DRAWINGS.items()):
             data = fn(theme)
             path = OUT / f"{name}-{theme}.svg"
             path.write_text(data)
