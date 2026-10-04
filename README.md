@@ -1,77 +1,132 @@
-<div align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
+  <img src="assets/hero-light.svg" width="100%" alt="Lourdu Raju, machine learning engineer at Sujanix, Bengaluru. An ink ensō around the kanji 侍 with an LR seal, and the vertical motto 七転八起: fall seven times, rise eight.">
+</picture>
 
-<img src="assets/hero.svg" width="100%" alt="Lourdu Raju. Machine Learning Engineer at Sujanix. I own computer-vision systems end to end: training runs, TensorRT engines, Triton serving, and the benchmarks that keep them honest.">
+[linkedin](https://www.linkedin.com/in/lourdhu) · [email](mailto:b.lourdhuraju1234@gmail.com) · [kaggle](https://www.kaggle.com/blourdhuraju)
 
-<a href="https://www.linkedin.com/in/lourdhu"><img src="assets/btn-linkedin.svg" height="44" alt="LinkedIn"></a>&nbsp;
-<a href="mailto:b.lourdhuraju1234@gmail.com"><img src="assets/btn-email.svg" height="44" alt="Email"></a>&nbsp;
-<a href="https://www.kaggle.com/blourdhuraju"><img src="assets/btn-kaggle.svg" height="44" alt="Kaggle"></a>
+I build computer-vision systems that hold up in production. Right now that means an OCR platform that reads electricity meters for a state utility: I train the models, compile them to TensorRT, serve them on Triton, and put a canary router in front. I keep production disciplined and leave the Jinx-style chaos in the notebook.
 
-</div>
+```json
+{
+  "name": "Lourdu Raju",
+  "role": "Machine Learning Engineer @ Sujanix",
+  "base": "Bengaluru, India",
+  "now": "meter-reading OCR for a state utility, 40M readings in production",
+  "craft": ["computer vision", "gpu inference", "mlops", "agents"],
+  "weapons": ["pytorch", "tensorrt", "triton", "onnx runtime", "aws", "langgraph"],
+  "code": "measure first, ship second, talk last",
+  "crew": ["Miyamoto Musashi", "Jinx", "Monkey D. Luffy"],
+  "open_to": "ml engineering roles"
+}
+```
 
-<br>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/katana-dark.svg">
+  <img src="assets/katana-light.svg" width="100%" alt="">
+</picture>
 
-<img src="assets/impact.svg" width="100%" alt="By the numbers. Accuracy: 79% to 91% on live traffic, measured over 40M production readings. Latency: 9x lower end-to-end p50, 1,415 ms to 156 ms. Capacity: 181 images per second sustained on one L4 GPU, 12.6x the production peak. Optimization: 94x classifier speed-up, ONNX Runtime 309.5 ms to TensorRT 3.3 ms.">
+## 壱 · the work
 
-<img src="assets/pipeline.svg" width="100%" alt="Production at Sujanix: meter-reading OCR for a state electricity utility. Photo, then meter presence (MobileViTv2), dial detection (YOLO26n-OBB), digital or analog (MobileViTv2), OCR (SVTRv2 + CTC), reading. Served on Triton with 9 TensorRT FP16 engines on an NVIDIA L4, behind a canary router with automatic fallback to serverless. 330K requests on the busiest day.">
+At **Sujanix** I own the meter-reading OCR platform for a state electricity utility. One photo goes in and one reading comes out. On the busiest day that was 330K requests.
 
-<img src="assets/card-models.svg" width="100%" alt="01, Models and MLOps: five vision models, one release process.">
+```text
+photo ───────> meter? ──────> dials ───────> type ────────> read ────────> "005269" · 0.97
+               mobilevitv2    yolo26n-obb    mobilevitv2    svtrv2 + ctc
+               └───── triton · 9 tensorrt fp16 engines · nvidia l4 ─────┘
 
-- Retrained the SVTRv2 reader for digital displays on production crops (96-px input, re-fit resize buckets, edge-replicated padding). Accuracy went **87.7% → 90.1%** on the full 3,965-image set, and **+8.7 pp** on low-quality photos.
-- Every release records the git SHA, DVC revision, config, checkpoint and target runtime. PyTorch → ONNX parity is checked (max difference **1.2e-5**), and promotion is gated on p50/p95/p99 benchmarks and an A/B comparison.
-- Made training **3.8× faster** on a DGX Spark (GB10): fused SDPA attention plus a static `torch.compile` took SVTRv2 from **80 → 305 img/s** and cut peak memory from **50.5 → 14.7 GB**.
+router ── canary slice ──> gpu path   ·   any error or 3 s timeout ──> serverless
+```
 
-<img src="assets/card-inference.svg" width="100%" alt="02, GPU inference: Triton and TensorRT on a single L4.">
+```text
+                          before      after
+reading accuracy          79%         91%         live traffic · 40M readings
+end-to-end latency, p50   1,415 ms    156 ms      serverless → gpu path
+classifier compute        309.5 ms    3.3 ms      onnx runtime → tensorrt fp16
+throughput                19 img/s    321 img/s   single image · 16 concurrent
+capacity, one l4 gpu      -           181 img/s   p95 340 ms · 0 errors · 12.6× prod peak
+container image           4.43 GB     2.2 GB      slimmed layers, then arm64
+svtrv2 training           80 img/s    305 img/s   fused sdpa + static torch.compile
+```
 
-- Moved the meter classifier from ONNX Runtime to TensorRT, after patching a `Transpose` on a UINT8 input that TensorRT rejects. Compute went **309.5 → 3.3 ms**, single-image p50 at 16 concurrent went **873 → 47 ms**, and throughput went **19 → 321 img/s**. That removed a cliff where throughput *fell* as load rose.
-- Load-tested one L4 with 67,719 requests: **181 img/s** sustained at p95 340 ms with zero errors, **12.6×** the production peak. Traced the ceiling to the host CPU (85–92% busy) while the GPU sat at ~45%.
-- Replaced fire-and-forget archiving, which dropped **475** objects under burst load, with an on-disk spool that retries S3 and DynamoDB writes. Also added JSON error codes, request IDs and a Triton watchdog.
+### 戦 · battle log
 
-<img src="assets/card-serving.svg" width="100%" alt="03, Production serving: serverless in production, GPU on canary.">
+- **The decoder that ate digits.** A release fell to 64.2% exact match. The CTC decoder didn't reset its repeat check on blank frames, so `4777.1` came out as `47.1`. A one-line fix brought it back to 84.0%, and tests now pin it.
+- **The cliff.** Throughput *dropped* as load rose. One classifier was still on ONNX Runtime. I moved it to TensorRT, after patching a `Transpose` on a UINT8 input that TensorRT rejects, and compute went from 309.5 ms to 3.3 ms.
+- **The missing 475.** Fire-and-forget archiving lost 475 objects under burst load. I replaced it with an on-disk spool that retries S3 and DynamoDB until every write lands.
+- **The wrong suspect.** At 181 img/s on one L4, the GPU sat at ~45% while the host CPU ran at 85–92%. Profile before you buy hardware.
+- **The hardest photos.** I retrained the SVTRv2 reader on production crops (96-px input, re-fit resize buckets, edge-replicated padding). Low-quality photos gained +8.7 pp, and the test set went from 87.7% to 90.1% overall.
 
-- Shipped frozen, checksummed releases of the production service. Exact match went **83.4% → 87.8%** on 2,950 labelled meter photos, and analog reads went **67.2% → 79.6%**.
-- Root-caused a release regression to a CTC decoding bug: blank frames didn't reset the repeat check, so `4777.1` decoded as `47.1`. Accuracy had fallen to **64.2%**. The fix restored **84.0%**, and tests now pin it.
-- Cut the container image from **4.43 → 2.2 GB**, and model loads for non-meter photos from **7 → 1**. Sized ONNX Runtime threads to the function's real vCPUs, and added SSRF-safe URL fetching, upload limits and CloudWatch EMF metrics.
-- Built the router that exposes the GPU path to real traffic safely: a hash-based canary split, automatic fallback on any non-2xx response or 3-second timeout, and one response shape for both paths.
+### 道 · how it ships
+
+- **One monorepo:** five models in a single uv + DVC repo. Every release records its git SHA, data version, config, checkpoint and runtime. PyTorch → ONNX parity is checked to 1.2e-5, and promotion is gated on p50/p95/p99 latency and an A/B run.
+- **Frozen releases:** the serverless service ships as frozen, checksummed releases. Exact match went 83.4% → 87.8% on 2,950 labelled photos, and analog reads went 67.2% → 79.6%.
+- **Canary router:** the router puts the GPU path in front of real traffic with a deterministic hash split. It falls back to serverless on any error or 3-second timeout, and both paths return one response shape.
 
 <details>
-<summary><b>How these numbers were measured</b></summary>
+<summary>how these numbers were measured</summary>
 <br>
 
-- **Headline accuracy (79% → 91%):** measured on live production traffic over 40M meter readings, not on a test set.
-- **Test-set accuracy** (the release and retraining figures): exact match of the whole reading, leading zeros ignored, on a fixed labelled set of 3,965 photos. The set has 2,950 meter photos (1,000 digital, 450 digital with decimals, 1,000 low-quality, 500 analog) and 1,015 non-meter photos, where the correct answer is "no reading". Every version is scored on the same images. The serverless release figures use only the 2,950 meter photos.
-- **Latency:** end to end from an office network, with all 3,965 photos sent through each path. GPU path: p50 156 ms, p95 205 ms. Serverless: p50 1,415 ms, p95 1,714 ms.
-- **Capacity:** a stepped load test of 67,719 requests against one g6.2xlarge (NVIDIA L4). "Sustained" means p95 ≤ 1 s with ≤ 0.5% errors. The production peak (14.4 requests/s) and the busiest day (330,707 requests) come from CloudWatch.
-- **TensorRT:** the timings are model compute inside Triton. The p50 and throughput figures are single-image requests at 16 concurrent on a GB10.
-
-The source repositories belong to my employer and are private. These figures are taken from their benchmark reports.
+- **79% → 91%:** measured on live production traffic, over 40M readings.
+- **Test-set figures:** exact match of the full reading, leading zeros ignored. The set holds 2,950 meter photos (1,000 digital, 450 with decimals, 1,000 low-quality, 500 analog) and 1,015 non-meter photos, where the correct answer is "no reading". Every version is scored on the same images.
+- **Latency:** end to end from an office network, with all 3,965 test photos sent through each path. GPU path: p50 156 ms, p95 205 ms. Serverless: p50 1,415 ms, p95 1,714 ms.
+- **Capacity:** a stepped load test of 67,719 requests on one g6.2xlarge (NVIDIA L4). "Sustained" means p95 ≤ 1 s with ≤ 0.5% errors. The production peak (14.4 req/s) and the busiest day (330,707 requests) come from CloudWatch.
+- **TensorRT:** the timings are model compute inside Triton. Throughput is single-image requests at 16 concurrent on a GB10.
+- **Sources:** the work repos belong to my employer and are private. These figures come from their benchmark reports.
 
 </details>
 
-<br>
+## 弐 · research
 
-<a href="https://github.com/Lourdhu02/svtrv2"><img src="assets/card-research.svg" width="100%" alt="Research: SVTRv2, reproduced and extended. Public repository."></a>
+**[svtrv2](https://github.com/Lourdhu02/svtrv2):** a paper-faithful SVTRv2 (ICCV 2025), checked against the official OpenOCR implementation, plus my extension **ARD**:
 
-- Checked the architecture against the official OpenOCR implementation: two 3×3 grouped-conv local mixing, W/4 timesteps, no positional embedding. There are 49 tests, including an end-to-end CPU training run.
-- **ARD, part 1:** a small learned router replaces MSR's hand-set aspect-ratio buckets. It is trained with a Bradley–Terry preference loss on which canvas the recognizer reads best.
-- **ARD, part 2:** the train-only semantic guidance module becomes a soft teacher for the CTC head, with uniform or Viterbi alignment (checked against brute force). The exported model stays byte-identical to the baseline.
-- Status: implemented and tested. Benchmark runs are in progress, so there are no accuracy claims yet.
+- **Adaptive resizing:** a small learned router replaces MSR's hand-set aspect-ratio buckets. It is trained with a Bradley–Terry preference loss on which canvas the recognizer reads best.
+- **SGM → CTC distillation:** the train-only semantic module teaches the CTC head, using uniform or Viterbi alignment (checked against brute force). The exported model stays byte-identical to the baseline.
+- **Status:** 49 tests pass. Benchmarks are still running, so there are no accuracy claims until they finish.
 
-<a href="https://github.com/Lourdhu02/echome"><img src="assets/card-echome.svg" width="100%" alt="Side project: ECHOME, local-first agent memory. Public repository."></a>
+## 参 · side quests
 
-<a href="https://github.com/Lourdhu02/fin-sentinal.ai"><img src="assets/card-finsentinel.svg" width="100%" alt="Side project: FinSentinelAI, private document RAG. Public repository."></a>
+- **[echome](https://github.com/Lourdhu02/echome):** a local-first agent with CoALA-style memory: episodic vectors in Qdrant, consolidated facts and mined procedures, all orchestrated by LangGraph. It also has a CAT/IRT assessment engine (GRM, Fisher-information item selection). It runs fully on-device with Ollama.
+- **[finsentinel.ai](https://github.com/Lourdhu02/fin-sentinal.ai):** private RAG over invoices, receipts and bank statements. It uses ChromaDB with per-user isolation, SentenceTransformers, Ollama, and a local VLM for scans. Nothing leaves the machine.
 
-<img src="assets/stack.svg" width="100%" alt="Stack. Modeling: PyTorch, YOLO OBB, OpenCV, NumPy, scikit-learn, Hugging Face. Inference: TensorRT, Triton, ONNX Runtime, TFLite, NGINX, Flask. Platform: AWS EC2, Lambda, S3, DynamoDB, Docker, Helm, Kubernetes. MLOps: DVC, uv, GitHub Actions, pytest, Ruff, pre-commit. GenAI: LangGraph, Ollama, Qdrant, ChromaDB, FastAPI, React.">
+## 肆 · arsenal
 
-<img src="assets/experience.svg" width="100%" alt="Experience. Machine Learning Engineer, Sujanix, January 2026 to present. Founder, SpaceDrift, August 2024 to December 2025. Data Science Intern, BrainOvision Solutions, February to April 2024. Recognition: Kaggle Notebooks Expert; Machine Learning Specialization (DeepLearning.AI, Stanford); Data Science with Python (NPTEL, IIT Madras).">
+```text
+vision      pytorch · ultralytics yolo (obb) · svtrv2 · mobilevit · opencv · numpy
+inference   tensorrt · triton · onnx runtime · tflite · nginx · flask · gunicorn
+cloud       aws ec2 · lambda · s3 · dynamodb · cloudwatch · docker · helm
+mlops       dvc · uv · github actions · pytest · ruff · pre-commit
+genai       langgraph · ollama · qdrant · chromadb · fastapi · react
+```
 
-<img src="assets/footer.svg" width="100%" alt="Open to ML engineering roles: production computer vision, inference optimization, applied GenAI. Email b.lourdhuraju1234@gmail.com, LinkedIn linkedin.com/in/lourdhu. Bengaluru, India.">
+## 伍 · path
 
-<div align="center">
+```text
+2026 ─ now    ml engineer   sujanix        meter-reading ocr: models → tensorrt → production
+2024 ─ 2025   founder       spacedrift     ml builds, data annotation, research support
+2024          ds intern     brainovision   forecasting with gbm ensembles, +15% accuracy
+```
 
-<a href="https://www.linkedin.com/in/lourdhu"><img src="assets/btn-linkedin.svg" height="44" alt="LinkedIn"></a>&nbsp;
-<a href="mailto:b.lourdhuraju1234@gmail.com"><img src="assets/btn-email.svg" height="44" alt="Email"></a>&nbsp;
-<a href="https://www.kaggle.com/blourdhuraju"><img src="assets/btn-kaggle.svg" height="44" alt="Kaggle"></a>
+kaggle notebooks expert · machine learning specialization (deeplearning.ai, stanford) · data science with python (nptel, iit madras)
 
-<sub>Every card and 3D render on this page is generated from code in <a href="assets/_build">assets/_build</a>.</sub>
+## 陸 · my dokkōdō
 
-</div>
+Musashi left 21 precepts. These are mine, so far:
+
+1. Measure before you claim.
+2. A model isn't done until it survives production.
+3. Read the decoder before you blame the model.
+4. Profile before you buy hardware.
+5. Never drop data silently.
+6. Ship behind a canary, and keep a fallback.
+7. Delete more than you add.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/katana-dark.svg">
+  <img src="assets/katana-light.svg" width="100%" alt="">
+</picture>
+
+<p align="center">
+  <sub>The One Piece is real: it's a model that still works in production.</sub><br>
+  <sub><a href="https://www.linkedin.com/in/lourdhu">linkedin</a> · <a href="mailto:b.lourdhuraju1234@gmail.com">email</a> · <a href="https://www.kaggle.com/blourdhuraju">kaggle</a></sub>
+</p>
