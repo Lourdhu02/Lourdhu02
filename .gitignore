@@ -1,3 +1,2 @@
-assets/_build/node_modules/
-assets/_build/out/
+assets/src/node_modules/
 __pycache__/
