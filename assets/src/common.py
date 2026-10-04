@@ -1,4 +1,4 @@
-"""Shared pieces: palettes, font subsetting and embedding, SVG document helpers."""
+"""Shared pieces: palettes, the type pair, font subsetting and embedding, SVG helpers."""
 import base64
 import io
 from collections import defaultdict
@@ -12,48 +12,29 @@ from fontTools.ttLib import TTFont
 HERE = Path(__file__).resolve().parent
 NM = HERE / "node_modules"
 
-# ink + vermilion (朱) carry the design; cyan and pink are Jinx's sparks, used rarely.
+# Valorant's navy, off-white and red carry the design; Jinx's pink and cyan are the rare sparks.
+# `card` fills the panels (hero, whoami); everything else sits on GitHub's own page colour.
 PALETTES = {
-    "light": dict(ink="#141414", ink2="#3B3B3B", muted="#8A8A8A", faint="#CCCCCC", grid="#141414", shu="#E3412B",
-                  cyan="#00A8E0", pink="#FF2E88", seal_text="#FFFFFF", blade="#1C1C1C", hamon="#B5B5B5",
-                  glint="#FFFFFF", cut="#FFFFFF"),
-    "dark": dict(ink="#EDE6DA", ink2="#C9C1B4", muted="#8B949E", faint="#3B424B", grid="#EDE6DA", shu="#FF5A45",
-                 cyan="#22D3EE", pink="#FF4FA3", seal_text="#FFFFFF", blade="#E6DFD2", hamon="#6E7681",
-                 glint="#FFFFFF", cut="#0D1117"),
+    "light": dict(card="#ECE8E1", card_line="#D6CFC3", page="#FFFFFF", ink="#0F1923", ink2="#36424D",
+                  muted="#5E6A72", faint="#C9CFD4", grid="#0F1923", red="#FF4655", on_red="#FFFFFF",
+                  cyan="#00A3B8", pink="#FF2E88", tile="#F4F2EE", tile_line="#DCD6CC"),
+    "dark": dict(card="#0F1923", card_line="#26333F", page="#0D1117", ink="#ECE8E1", ink2="#C3C8C4",
+                 muted="#8B949E", faint="#2F3B47", grid="#ECE8E1", red="#FF4655", on_red="#FFFFFF",
+                 cyan="#2DE2E6", pink="#FF4FA3", tile="#121D27", tile_line="#26333F"),
 }
-for _p in PALETTES.values():
-    _p["glitch_a"], _p["glitch_b"] = _p["cyan"], _p["pink"]
 
-# ---------------------------------------------------------------- fonts
-FONTS = {
-    "mincho": ("@fontsource/shippori-mincho-b1", "shippori-mincho-b1", 800),
-    "brush": ("@fontsource/yuji-syuku", "yuji-syuku", 400),
+# ---------------------------------------------------------------- the type pair
+# Display: Big Shoulders Display, condensed caps in the spirit of Valorant's headline type.
+# Text: JetBrains Mono for HUD labels, code and numbers. Both SIL OFL 1.1.
+_BSD = NM / "@fontsource/big-shoulders-display/files"
+_JBM = NM / "jetbrains-mono/fonts/webfonts"
+FACES = {
+    "d9": _BSD / "big-shoulders-display-latin-900-normal.woff2",
+    "d8": _BSD / "big-shoulders-display-latin-800-normal.woff2",
+    "mono": _JBM / "JetBrainsMono-Medium.woff2",
+    "monob": _JBM / "JetBrainsMono-Bold.woff2",
 }
-MONO = NM / "jetbrains-mono/fonts/webfonts/JetBrainsMono-Medium.woff2"
-MONO_BOLD = NM / "jetbrains-mono/fonts/webfonts/JetBrainsMono-Bold.woff2"
-
-
-@lru_cache(None)
-def chunk_cmaps(key):
-    """fontsource ships CJK fonts as many unicode-range chunks; map each chunk to its cmap."""
-    pkg, prefix, wt = FONTS[key]
-    files = sorted((NM / pkg / "files").glob(f"{prefix}-*-{wt}-normal.woff2"))
-    return [(f, set(TTFont(str(f)).getBestCmap())) for f in files]
-
-
-def font_files_for(key, chars):
-    """Group chars by the chunk file that contains them (prefer the 'latin' chunk for ASCII)."""
-    groups = defaultdict(set)
-    chunks = chunk_cmaps(key)
-    latin = [c for c in chunks if "-latin-" in c[0].name]
-    for ch in chars:
-        cp = ord(ch)
-        pool = latin + chunks if cp < 0x250 else chunks
-        for f, cmap in pool:
-            if cp in cmap:
-                groups[f].add(ch)
-                break
-    return groups
+MONO_ADV = 0.6  # JetBrains Mono: every glyph advances 600/1000 em
 
 
 @lru_cache(None)
@@ -80,17 +61,14 @@ def advance_table(path):
     return f["head"].unitsPerEm, cmap, adv
 
 
-def text_width(path, s, size, ls=0.0):
-    upm, cmap, adv = advance_table(path)
-    return sum(adv.get(cmap.get(ord(c)), upm // 2) for c in s) * size / upm + ls * len(s)
-
-
-def unicode_range(chars):
-    return ",".join(f"U+{ord(c):04X}" for c in sorted(chars))
+def text_width(fam, s, size, ls=0.0):
+    """Advance width of `s` set in face `fam` (kerning ignored, so it errs a touch wide)."""
+    upm, cmap, adv = advance_table(FACES[fam])
+    return sum(adv[cmap[ord(c)]] for c in s) * size / upm + ls * len(s)
 
 
 class Fonts:
-    """Collects the characters each family needs and emits subset @font-face rules."""
+    """Collects the characters each face needs and emits subset @font-face rules plus a class per face."""
 
     def __init__(self):
         self.need = defaultdict(set)
@@ -103,33 +81,11 @@ class Fonts:
         rules = []
         for fam, chars in sorted(self.need.items()):
             chars = set(chars) | {" "}
-            if fam == "monob":
-                rules.append(f"@font-face{{font-family:monob;src:url(data:font/woff2;base64,{subset_b64(MONO_BOLD, ''.join(sorted(chars)))})}}")
-                continue
-            if fam == "mono":
-                missing = [c for c in chars if ord(c) not in advance_table(MONO)[1]]
-                assert not missing, f"JetBrains Mono lacks {missing}"
-                rules.append(f"@font-face{{font-family:mono;src:url(data:font/woff2;base64,{subset_b64(MONO, ''.join(sorted(chars)))})}}")
-                continue
-            for path, cs in sorted(font_files_for(fam, chars).items()):
-                cs = "".join(sorted(cs))
-                rules.append(
-                    f"@font-face{{font-family:{fam};unicode-range:{unicode_range(cs)};"
-                    f"src:url(data:font/woff2;base64,{subset_b64(path, cs)})}}"
-                )
+            missing = sorted(c for c in chars if ord(c) not in advance_table(FACES[fam])[1])
+            assert not missing, f"{FACES[fam].name} lacks {missing}"
+            b64 = subset_b64(FACES[fam], "".join(sorted(chars)))
+            rules.append(f"@font-face{{font-family:{fam};src:url(data:font/woff2;base64,{b64})}}.{fam}{{font-family:{fam}}}")
         return "".join(rules)
-
-
-def mincho_width(s, size, ls=0.0):
-    widths = 0.0
-    for ch in s:
-        groups = font_files_for("mincho", ch)
-        path = next(iter(groups))
-        widths += text_width(path, ch, size)
-    return widths + ls * len(s)
-
-
-MONO_ADV = 0.6  # JetBrains Mono: every glyph advances 600/1000 em
 
 
 def svg_doc(w, h, title, desc, style, body, defs=""):
@@ -143,3 +99,10 @@ def svg_doc(w, h, title, desc, style, body, defs=""):
 
 def pts(points):
     return " ".join(f"{x:.1f},{y:.1f}" for x, y in points)
+
+
+def chamfer(x, y, w, h, tl=0.0, tr=0.0, br=0.0, bl=0.0):
+    """Closed outline of a rectangle with cut corners, clockwise from the top-left."""
+    p = [(x + tl, y), (x + w - tr, y), (x + w, y + tr), (x + w, y + h - br), (x + w - br, y + h),
+         (x + bl, y + h), (x, y + h - bl), (x, y + tl), (x + tl, y)]
+    return [q for i, q in enumerate(p) if i == 0 or q != p[i - 1]]
