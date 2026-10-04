@@ -7,19 +7,10 @@
 
 I build computer-vision systems that hold up in production. Right now that means an OCR platform that reads electricity meters for a state utility: I train the models, compile them to TensorRT, serve them on Triton, and put a canary router in front. I keep production disciplined and leave the Jinx-style chaos in the notebook.
 
-```json
-{
-  "name": "Lourdu Raju",
-  "role": "Machine Learning Engineer @ Sujanix",
-  "base": "Bengaluru, India",
-  "now": "meter-reading OCR for a state utility, 40M readings in production",
-  "craft": ["computer vision", "gpu inference", "mlops", "agents"],
-  "weapons": ["pytorch", "tensorrt", "triton", "onnx runtime", "aws", "langgraph"],
-  "code": "measure first, ship second, talk last",
-  "crew": ["Miyamoto Musashi", "Jinx", "Monkey D. Luffy"],
-  "open_to": "ml engineering roles"
-}
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/whoami-dark.svg">
+  <img src="assets/whoami-light.svg" width="100%" alt="A terminal runs cat whoami.json. whoami: Lourdu Raju. role: Machine Learning Engineer @ Sujanix. base: Bengaluru, India. mission: make vision models fast, honest, and boring to run. now: building meter-reading OCR for a state electricity utility; readings in prod: 40M; accuracy: 79% to 91%; busiest day requests: 330707; p50 ms: 156. craft: computer vision, gpu inference, mlops, agents. weapons: pytorch, tensorrt, triton, onnx runtime, aws, langgraph. code: measure first, ship second, talk last. crew: discipline Miyamoto Musashi, chaos Jinx, freedom Monkey D. Luffy. open to ml roles: true.">
+</picture>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/katana-dark.svg">
@@ -30,13 +21,21 @@ I build computer-vision systems that hold up in production. Right now that means
 
 At **Sujanix** I own the meter-reading OCR platform for a state electricity utility. One photo goes in and one reading comes out. On the busiest day that was 330K requests.
 
-```text
-photo ───────> meter? ──────> dials ───────> type ────────> read ────────> "005269" · 0.97
-               mobilevitv2    yolo26n-obb    mobilevitv2    svtrv2 + ctc
-               └───── triton · 9 tensorrt fp16 engines · nvidia l4 ─────┘
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/dwg01-pipeline-dark.svg">
+  <img src="assets/dwg01-pipeline-light.svg" width="100%" alt="Drawing 01, inference pipeline: photo, meter presence (MobileViTv2, 3x256x256), dial detection (YOLO26n-OBB, 3x352x352), digital or analog (MobileViTv2), SVTRv2 + CTC readers, reading. Nine TensorRT FP16 engines on Triton, NVIDIA L4. Red pulses trace a photo through the stages; analog reads pass in cyan.">
+</picture>
 
-router ── canary slice ──> gpu path   ·   any error or 3 s timeout ──> serverless
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/dwg02-serving-dark.svg">
+  <img src="assets/dwg02-serving-light.svg" width="100%" alt="Drawing 02, serving topology: backend to router; a canary slice goes nginx, gunicorn gateway, Triton (p50 156 ms, p95 205 ms) and spools every request to S3 and DynamoDB; the rest goes to a container Lambda (p50 1,415 ms, p95 1,714 ms). Any non-2xx or 3 s timeout falls back to serverless, shown in pink.">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/dwg03-gauges-dark.svg">
+  <img src="assets/dwg03-gauges-light.svg" width="100%" alt="Drawing 03, four gauges sweeping from before to after: accuracy 79% to 91% on live traffic over 40M readings; p50 latency 1,415 ms to 156 ms; classifier compute 309.5 ms to 3.3 ms with TensorRT; capacity from a 14.4 req/s production peak to 181 img/s on one L4.">
+</picture>
+
 
 ```text
                           before      after
@@ -58,6 +57,11 @@ svtrv2 training           80 img/s    305 img/s   fused sdpa + static torch.comp
 - **The hardest photos.** I retrained the SVTRv2 reader on production crops (96-px input, re-fit resize buckets, edge-replicated padding). Low-quality photos gained +8.7 pp, and the test set went from 87.7% to 90.1% overall.
 
 ### 道 · how it ships
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/dwg04-release-dark.svg">
+  <img src="assets/dwg04-release-light.svg" width="100%" alt="Drawing 04, release flow as five torii gates: train (DVC revision, git SHA, config), export (ONNX to TensorRT, parity within 1.2e-5), benchmark (p50, p95, p99), deterministic A/B gate, promote (registry stage, then canary). A release token passes through; sometimes the A/B gate rejects a regression and it rolls back.">
+</picture>
 
 - **One monorepo:** five models in a single uv + DVC repo. Every release records its git SHA, data version, config, checkpoint and runtime. PyTorch → ONNX parity is checked to 1.2e-5, and promotion is gated on p50/p95/p99 latency and an A/B run.
 - **Frozen releases:** the serverless service ships as frozen, checksummed releases. Exact match went 83.4% → 87.8% on 2,950 labelled photos, and analog reads went 67.2% → 79.6%.
