@@ -12,15 +12,15 @@ from fontTools.ttLib import TTFont
 HERE = Path(__file__).resolve().parent
 NM = HERE / "node_modules"
 
-# Valorant's navy, off-white and red carry the design; Jinx's pink and cyan are the rare sparks.
-# `card` fills the panels (hero, whoami); everything else sits on GitHub's own page colour.
+# White, black and one red. Everything sits on GitHub's own page colour; the only filled surface is the
+# terminal (`term*`). Pink and cyan survive only as signal colours inside the figures (fallback, analog reads).
 PALETTES = {
-    "light": dict(card="#ECE8E1", card_line="#D6CFC3", page="#FFFFFF", ink="#0F1923", ink2="#36424D",
-                  muted="#5E6A72", faint="#C9CFD4", grid="#0F1923", red="#FF4655", on_red="#FFFFFF",
-                  cyan="#00A3B8", pink="#FF2E88", tile="#F4F2EE", tile_line="#DCD6CC"),
-    "dark": dict(card="#0F1923", card_line="#26333F", page="#0D1117", ink="#ECE8E1", ink2="#C3C8C4",
-                 muted="#8B949E", faint="#2F3B47", grid="#ECE8E1", red="#FF4655", on_red="#FFFFFF",
-                 cyan="#2DE2E6", pink="#FF4FA3", tile="#121D27", tile_line="#26333F"),
+    "light": dict(ink="#111111", ink2="#3D3D3D", muted="#6E6E6E", faint="#DADADA", grid="#111111", red="#E5252A",
+                  on_red="#FFFFFF", cyan="#0091AD", pink="#D6197A", tile="#F5F5F5", tile_line="#E2E2E2",
+                  term="#111111", term_line="#111111", term_ink="#F2F2F2", term_muted="#8A8A8A", term_red="#FF4655"),
+    "dark": dict(ink="#F0F0F0", ink2="#C9C9C9", muted="#8B949E", faint="#30363D", grid="#F0F0F0", red="#FF4655",
+                 on_red="#FFFFFF", cyan="#2DE2E6", pink="#FF4FA3", tile="#161B22", tile_line="#30363D",
+                 term="#161B22", term_line="#30363D", term_ink="#E6EDF3", term_muted="#8B949E", term_red="#FF4655"),
 }
 
 # ---------------------------------------------------------------- the type pair

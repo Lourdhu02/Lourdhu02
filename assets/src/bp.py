@@ -1,4 +1,4 @@
-"""Line drawings for the work (FIG 01-06) and the animated whoami terminal.
+"""Line drawings for the work (FIG 01-06).
 
 Every drawing sketches itself in over a faint dot grid: strokes draw on, labels fade
 in, dimension lines appear. Then the loop starts: red pulses run along the wires and
@@ -6,10 +6,9 @@ nodes flash as data passes. Now and then a cyan or pink spark shows up, Jinx-sty
 Panels and nodes have cut corners, labels are set in the display face (see common.py).
 """
 import math
-import re
 from xml.sax.saxutils import escape
 
-from common import MONO_ADV, PALETTES, Fonts, chamfer, svg_doc, text_width
+from common import PALETTES, Fonts, chamfer, svg_doc, text_width
 
 START = 2.8  # seconds: the drawing is finished, the loop begins
 TOTAL_SHEETS = 6
@@ -690,113 +689,7 @@ def dwg_finsentinel(theme):
     return D.render()
 
 
-# ================================================================= whoami terminal
-WHOAMI = """{
-  "agent": "Lourdu Raju",
-  "class": "ML engineer · computer vision",
-  "base": "Bengaluru, India",
-  "now": "meter-reading OCR for a state electricity utility",
-  "loadout": ["pytorch", "tensorrt", "triton", "onnx", "aws", "langgraph"],
-  "side_quests": ["svtrv2", "echome", "finsentinel.ai"],
-  "code": ["measure first", "ship second", "talk last"],
-  "crew": { "discipline": "Musashi", "chaos": "Jinx", "freedom": "Luffy" },
-  "open_to_ml_roles": true
-}"""
-
-TOKEN = re.compile(r'("(?:[^"\\]|\\.)*")(\s*:)?|(-?\d+(?:\.\d+)?)|(true|false|null)|([{}\[\],:])|( +)')
-
-
-def whoami(theme):
-    """An agent file: a panel cut like the hero's that types `cat whoami.json` and prints it, syntax-coloured."""
-    P = PALETTES[theme]
-    fonts = Fonts()
-    size, lh = 13.2, 20.5
-    cw = MONO_ADV * size
-    lines = WHOAMI.split("\n")
-    x0, y_prompt = 40, 88
-    y_first = y_prompt + 30
-    H = int(y_first + len(lines) * lh + 36)
-    W = 900
-    css, body, defs = [], [], []
-    css.append("@keyframes fade{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}")
-    card = chamfer(0.75, 0.75, W - 1.5, H - 1.5, tr=26, bl=26)
-    body.append(f'<path d="{pathd(card)}Z" fill="{P["card"]}" stroke="{P["card_line"]}" stroke-width="1.5"/>')
-    tag = "AGENT FILE"
-    fonts.use("d8", tag)
-    tw = text_width("d8", tag, 13, 1.4) + 22
-    body.append(f'<path d="M{x0 + 7} 26 H{x0 + tw:.1f} L{x0 + tw - 7:.1f} 46 H{x0} Z" fill="{P["red"]}"/>')
-    body.append(f'<text x="{x0 + 12}" y="41" class="d8" font-size="13" fill="{P["on_red"]}" letter-spacing="1.4">{tag}</text>')
-    where = "~/lourdu/whoami.json"
-    fonts.use("mono", where)
-    body.append(f'<text x="{x0 + tw + 12:.1f}" y="40.5" class="mono" font-size="11" fill="{P["muted"]}" letter-spacing=".8">{escape(where)}</text>')
-    ro = "READ-ONLY"
-    fonts.use("mono", ro)
-    body.append(f'<text x="{W - 40}" y="40.5" class="mono" font-size="11" fill="{P["muted"]}" letter-spacing="1.6" text-anchor="end">{ro}</text>')
-    body.append(f'<path d="M{x0} 58 H{W - 40}" stroke="{P["card_line"]}" stroke-width="1.2"/>')
-    body.append(f'<path d="M{x0} 58 H{x0 + 56}" stroke="{P["red"]}" stroke-width="2.4"/>')
-
-    def prompt(y, cls=""):
-        fonts.use("mono", "~$")
-        body.append(f'<text x="{x0}" y="{y}" class="mono {cls}" font-size="{size}" fill="{P["muted"]}">~ <tspan fill="{P["red"]}">$</tspan></text>')
-
-    # typed command
-    prompt(y_prompt)
-    cmd = "cat whoami.json"
-    fonts.use("mono", cmd)
-    cx0 = x0 + 4 * cw
-    t0, dt = 0.5, 0.06
-    keyt = [0.0] + [min(0.999, (t0 + (i + 1) * dt) / 3.0) for i in range(len(cmd))]
-    vals = [0.0] + [(i + 1) * cw for i in range(len(cmd))]
-    defs.append(
-        f'<clipPath id="cmd"><rect x="{cx0:.1f}" y="{y_prompt - size}" width="{len(cmd) * cw:.1f}" height="{size * 1.5:.1f}">'
-        f'<animate attributeName="width" dur="3s" fill="freeze" calcMode="discrete" keyTimes="{";".join(f"{v:.4f}" for v in keyt)}" '
-        f'values="{";".join(f"{v:.1f}" for v in vals)}"/></rect></clipPath>'
-    )
-    body.append(f'<text x="{cx0:.1f}" y="{y_prompt}" class="mono" font-size="{size}" fill="{P["ink"]}" clip-path="url(#cmd)">{cmd}</text>')
-
-    # JSON, one line at a time: keys red, strings ink, numbers cyan, booleans pink
-    start = t0 + len(cmd) * dt + 0.35
-    for i, line in enumerate(lines):
-        indent = len(line) - len(line.lstrip(" "))
-        assert x0 + len(line) * cw < W - 40, line
-        y = y_first + i * lh
-        tsp = []
-        for m in TOKEN.finditer(line.lstrip(" ")):
-            st, colon, num, kw, punct, _space = m.groups()
-            if st is not None:
-                spans = [(st, P["red"] if colon else P["ink"])] + ([(colon.strip(), P["muted"])] if colon else [])
-            elif num is not None:
-                spans = [(num, P["cyan"])]
-            elif kw is not None:
-                spans = [(kw, P["pink"])]
-            elif punct is not None:
-                spans = [(punct, P["muted"])]
-            else:
-                spans = [(" ", None)]
-            for text, col in spans:
-                fonts.use("mono", text)
-                tsp.append(" " if col is None else f'<tspan fill="{col}">{escape(text)}</tspan>')
-        c = f"l{i}"
-        css.append(f".{c}{{animation:fade .22s ease-out {start + i * 0.08:.2f}s both}}")
-        body.append(f'<text x="{x0 + indent * cw:.1f}" y="{y:.1f}" class="mono {c}" font-size="{size}" xml:space="preserve">{"".join(tsp)}</text>')
-
-    # fresh prompt with a blinking cursor
-    y_end = y_first + len(lines) * lh + 8
-    t_end = start + len(lines) * 0.08 + 0.3
-    css.append(f".pe{{animation:fade .2s ease-out {t_end:.2f}s both}}"
-               f".cur{{animation:fade .2s ease-out {t_end:.2f}s both,blink 1.05s steps(1) {t_end:.2f}s infinite}}"
-               "@keyframes blink{0%{opacity:1}50%{opacity:0}}")
-    prompt(y_end, "pe")
-    body.append(f'<rect class="cur" x="{x0 + 4 * cw:.1f}" y="{y_end - size * 0.8:.1f}" width="{cw * 0.62:.1f}" height="{size:.1f}" fill="{P["red"]}"/>')
-
-    style = fonts.css() + "".join(css)
-    return svg_doc(W, H, "whoami.json",
-                   "An agent file. A terminal runs cat whoami.json: " + " ".join(l.strip() for l in lines),
-                   style, "".join(body), "".join(defs))
-
-
 DRAWINGS = {
-    "whoami": whoami,
     "fig01-pipeline": dwg_pipeline,
     "fig02-serving": dwg_serving,
     "fig03-release": dwg_release,
