@@ -1,16 +1,15 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
-  <img src="assets/hero-light.svg" width="100%" alt="Agent profile: Lourdu Raju, machine learning engineer at Sujanix, Bengaluru, open to ML roles. Computer vision, GPU inference, MLOps. Abilities: detect, read, accelerate (9× faster p50). Ultimate: 40M readings in production, live accuracy 79% → 91%.">
+  <img src="assets/hero-light.svg" width="100%" alt="Lourdu Raju, machine learning engineer: computer vision, GPU inference, MLOps. Make vision models fast, honest and boring to run. 40M readings in production; live accuracy 91%, up from 79%; p50 latency 9× faster, 1,415 → 156 ms. A terminal prints whoami.json: base Bengaluru, India; now meter-reading OCR at Sujanix; stack pytorch, tensorrt, triton; crew: discipline Musashi, chaos Jinx, freedom Luffy; open to ML roles.">
 </picture>
 
-[LinkedIn](https://www.linkedin.com/in/lourdhu) · [Email](mailto:b.lourdhuraju1234@gmail.com) · [Kaggle](https://www.kaggle.com/blourdhuraju)
+<p>
+  <a href="https://www.linkedin.com/in/lourdhu"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/btn-linkedin-dark.svg"><img src="assets/btn-linkedin-light.svg" alt="LinkedIn"></picture></a>
+  <a href="mailto:b.lourdhuraju1234@gmail.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/btn-email-dark.svg"><img src="assets/btn-email-light.svg" alt="Email"></picture></a>
+  <a href="https://www.kaggle.com/blourdhuraju"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/btn-kaggle-dark.svg"><img src="assets/btn-kaggle-light.svg" alt="Kaggle"></picture></a>
+</p>
 
-I build computer-vision systems that hold up in production. At **Sujanix** I own an OCR platform that reads electricity meters for a state utility: I train the models, compile them to TensorRT, serve them on Triton and put a canary router in front. On the side I rebuild papers and build agents that remember. Production stays disciplined; the Jinx-style chaos stays in the notebook.
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/whoami-dark.svg">
-  <img src="assets/whoami-light.svg" width="100%" alt="Agent file, cat whoami.json. agent: Lourdu Raju. class: ML engineer, computer vision. base: Bengaluru, India. now: meter-reading OCR for a state electricity utility. loadout: pytorch, tensorrt, triton, onnx, aws, langgraph. side quests: svtrv2, echome, finsentinel.ai. code: measure first, ship second, talk last. crew: discipline Musashi, chaos Jinx, freedom Luffy. open to ML roles: true.">
-</picture>
+I build computer-vision systems that hold up in production: I train the models, compile them to TensorRT, serve them on Triton and put a canary router in front. On the side I rebuild papers and build agents that remember. Production stays disciplined; the Jinx-style chaos stays in the notebook.
 
 <br>
 
